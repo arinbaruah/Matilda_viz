@@ -1,0 +1,23 @@
+---
+title: "Visualisation"
+author: "Arindam Baruah"
+format: html
+---
+
+```{r}
+library(tidyverse)
+library(ggthemes)
+library(ggplot2)
+```
+
+```{r}
+df_survey <- read_csv("data/survey.csv")
+df_substance_deaths <- read_csv("data/death-rate-from-mental-health-and-substance-use-disorders-who.csv")
+df_substance_deaths_age <- read_csv("data/death-rates-from-mental-and-substance-disorders-by-age-who.csv")
+df_us_mental_deaths <- read_csv("data/US_mental_order_deaths.csv")
+df_drug_dependency <- read_csv("data/mental-health-as-risk-for-drug-dependency.csv")
+df_drug_gender <- read_csv("data/deaths-drug-use-disorders-by-sex.csv")
+df_drug_deaths <- tibble(drug = c("Tobacco","Alcohol use (Indirect)","Illicit drugs","Alcogol use (Direct)"),
+                         deaths = c(7.25*10^6,1.81*10^6,600638,158469)) # Deaths in 2021 by IHME, Global burden of disease
+```
+
