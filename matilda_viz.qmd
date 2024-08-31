@@ -31,8 +31,13 @@ library(ggplot2)
 library(ggtext)
 library(sysfonts)
 library(showtext)
-
-
+library(geomtextpath)
+library(stringr)
+library(ggplot2)
+library(ggnewscale)
+library(paletteer)
+library(colorspace)
+library(extrafont)
 # caption handles
 swd <- str_glue("#SWDchallenge: June 2024 &bull; Source: Synthetic data from ChatGPT<br>")  
 li <- str_glue("<span style='font-family:fa6-brands'>&#xf08c;</span>")  
@@ -98,7 +103,7 @@ df_drug_gender %>% mutate(prop_male = 100*`Total deaths from drug use disorders 
 # Share of deaths across genders
 
 ```{r}
-
+#| warning: false
 continents <- c("North America","South America","Asia","Oceania","Africa","World")
 
 imp_countries <- c("India","China","United States","Australia","Canada","Germany","United Kingdom")
@@ -121,9 +126,10 @@ x = `Total deaths from drug use disorders among females`)) + geom_point(color = 
   scale_y_continuous(transform = "log10", labels = scales::comma) +
   labs(x =     "Female deaths (log)",
        y =     "Male deaths (log)",
-       title = "Share of deaths by gender due to drug use disorder",
-       subtitle = "Study across various countries indicated that the number of deaths as a result of drug use disorder was significantly high in the United States, with the number of deaths recorded in 2021 being as high as 100000. The trend across ",
-       caption = "Source: IHME, Global Burden of Disease") +
+       title = "Drug Use Disorders and Mortality: Understanding the Gender Gap",
+       subtitle = "The data across various countries has revealed a concerning trend: the number of deaths resulting from drug use disorders <br> is significantly high in the <span style='color: darkred;'> United States </span>, with approximately <strong> 100,000 deaths recorded in 2021 alone </strong>. Furthermore, the data <br> suggests that in most countries, 
+       males are disproportionately affected by drug use disorders, with <strong> death rates among males <br> consistently exceeding those among females </strong>. This highlights that males are at a far greater risk of succumbing to the <br> harmful effects of illicit drugs.",
+       caption = "Source: IHME, Global Burden of Disease, 2021") +
   theme(legend.position = "top",
     legend.title.position = "top",
     legend.title = element_text(
@@ -149,7 +155,7 @@ x = `Total deaths from drug use disorders among females`)) + geom_point(color = 
       hjust               = 0.5
     ),        
     plot.subtitle         = element_markdown(
-      size                = rel(1), 
+      size                = rel(0.6), 
       family              = 'subtitle',
       color               = subtitle_col,
       hjust               = 0,
@@ -175,9 +181,69 @@ x = `Total deaths from drug use disorders among females`)) + geom_point(color = 
 
 
 gr1
+ggsave("images/Gender_death_rate.png",gr1,dpi = 300,height = 6, width = 10)
 ```
 ```{r}
 df_drug_gender %>% filter(Entity != continents) %>% arrange(-`Total deaths from drug use disorders among males`)
 ```
 
+
+```{r}
+df_substance_deaths
+
+my_col = c("United States" = "#A93226","Canada" = "#E67E22","North America" = "#AAB7B8", 
+           "South America" = "#AAB7B8", "Asia" = "#AAB7B8","Oceania" = "#AAB7B8","Africa" = "#AAB7B8")
+tags<- c("North America","South America","Asia","Oceania","Africa","United States","Canada")
+
+ggplot(data = df_substance_deaths %>% filter(Entity %in% tags) , aes(x = Year,
+                                       y = `Death rate from mental and substance use disorders among both sexes`
+                                       )) + 
+  geom_line(aes(group = Entity,colour = Entity),linewidth = 0.25) +
+  geom_point(
+        aes(color = Entity), fill = "grey96",
+        shape = 21, size = 2, stroke = .25
+    ) +
+  geom_rect(aes(
+    xmin = 2020, xmax = 2022,    # X range for the shaded region
+    ymin = 0, ymax = 40   # Y range for the shaded region
+  ), fill = "steelblue",
+     alpha = 0.1) +
+  scale_color_manual(values = my_col |> lighten(.5)) +
+    new_scale_color() +
+    geom_smooth(
+        aes(group = Entity, color = Entity),
+        linewidth = 3, se = FALSE, lineend = "round"
+    ) +
+
+    scale_color_manual(values = my_col |> alpha(0.3)) +
+    
+    new_scale_color() +
+    geom_textsmooth(
+        aes(color = Entity, label = Entity),
+        linewidth = .5, se = FALSE, lineend = "round",
+        fontface = "bold"
+    ) +     theme_minimal()  +
+
+    scale_color_manual(values = my_col |> darken(.25)) +
+  theme(
+        legend.position = "none",
+        
+        panel.grid.major = element_line(linewidth = .45, color = "grey85"),
+        panel.grid.minor = element_line(linewidth = .35, linetype = "dashed", color = "grey85"),
+        
+        #axis.title = element_blank(),
+        
+        axis.text.x = element_text(face = "bold"),
+        
+        plot.title    = element_text(size = 26, face = "bold", color = "#2E2A2B"),
+        plot.subtitle = element_markdown(size = 11, margin = margin(b = 10)),
+        plot.caption  = element_markdown(size = 7,  margin = margin(t = 10)),
+        
+        plot.title.position = "plot",
+        plot.caption.position = "plot",
+        
+        plot.background = element_rect(fill = "#fbfbf8", color = NA),
+        plot.margin = margin(20, 20, 20, 20)
+    ) + xlim(c(2000,2022)) 
+```
 
