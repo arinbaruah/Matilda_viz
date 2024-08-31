@@ -19,5 +19,165 @@ df_drug_dependency <- read_csv("data/mental-health-as-risk-for-drug-dependency.c
 df_drug_gender <- read_csv("data/deaths-drug-use-disorders-by-sex.csv")
 df_drug_deaths <- tibble(drug = c("Tobacco","Alcohol use (Indirect)","Illicit drugs","Alcogol use (Direct)"),
                          deaths = c(7.25*10^6,1.81*10^6,600638,158469)) # Deaths in 2021 by IHME, Global burden of disease
+df_pop <- read_csv("data/population.csv",skip = 3)
 ```
+
+```{r}
+library(tidyverse)
+library(stringr)
+library(glue)
+library(ggrepel)
+library(ggplot2)
+library(ggtext)
+library(sysfonts)
+library(showtext)
+
+
+# caption handles
+swd <- str_glue("#SWDchallenge: June 2024 &bull; Source: Synthetic data from ChatGPT<br>")  
+li <- str_glue("<span style='font-family:fa6-brands'>&#xf08c;</span>")  
+gh <- str_glue("<span style='font-family:fa6-brands'>&#xf09b;</span>")
+mn <- str_glue("<span style='font-family:fa6-brands'>&#xf4f6;</span>")
+
+
+# plot colors
+bkg_col      <- colorspace::lighten("#fbfbf8", 0.05)    
+title_col    <- "#3d3d3d"           
+subtitle_col <- "#3d3d3d"     
+caption_col  <- "#72647D"   
+text_col     <- colorspace::darken("gray40" , 0.2)  
+
+# fonts
+
+font_add('fa6-brands','fontawesome/otfs/Font Awesome 6 Brands-Regular-400.otf') 
+font_add_google("DM Serif Display", regular.wt = 400, family = "title")                 
+font_add_google("Urbanist", regular.wt = 400, family = "subtitle")  
+font_add_google("Quattrocento Sans", regular.wt = 400, family = "text")        
+font_add_google("Merriweather", regular.wt = 400,family = "caption")
+showtext_auto(enable = TRUE)  
+
+
+X_icon <- glue("<span style='font-family:fa6-brands'>&#xe61b;</span>")
+
+caption_text <- str_glue("{li} Arindam Baruah | {X_icon} @wizsights | {gh} arinbaruah | Source: TidyTuesday |#rstudio #ggplot2")
+
+theme_set(theme_minimal(base_size = 15, base_family = "text"))                
+
+# Theme updates
+
+theme_update(
+  plot.title.position   = "plot",
+  plot.caption.position = "plot",
+  legend.position       = 'plot',
+  plot.margin           = margin(t = 10, r = 15, b = 0, l = 15),
+  plot.background       = element_rect(fill = bkg_col, color = bkg_col),
+  panel.background      = element_rect(fill = bkg_col, color = bkg_col),
+  axis.title.x          = element_text(margin = margin(10, 0, 0, 0), size = rel(1), color = text_col, family = 'text', face = 'bold'),
+  axis.title.y          = element_text(margin = margin(0, 10, 0, 0), size = rel(1), color = text_col, family = 'text', face = 'bold'),
+  axis.text             = element_text(size = 10, color = text_col, family = 'text',face = "bold"),
+  panel.grid.minor.y    = element_blank(),
+  panel.grid.major.y    = element_line(linetype = "dotted", linewidth = 0.1, color = 'gray40'),
+  panel.grid.minor.x    = element_blank(),
+  panel.grid.major.x    = element_blank(),
+  axis.line.x           = element_line(color = "#d7d7d8", linewidth = .2),
+)
+```
+
+
+```{r}
+df_drug_gender <- df_drug_gender %>% filter(Year == 2021)
+df_pop <- df_pop %>% select(`Country Name`,`2021`) 
+df_drug_gender <- inner_join(df_drug_gender,df_pop,by = c("Entity"="Country Name"))
+
+
+```
+
+```{r}
+df_drug_gender %>% mutate(prop_male = 100*`Total deaths from drug use disorders among females` / `2021`) %>% filter(`Total deaths from drug use disorders among males` > 1000)
+```
+# Share of deaths across genders
+
+```{r}
+
+continents <- c("North America","South America","Asia","Oceania","Africa","World")
+
+imp_countries <- c("India","China","United States","Australia","Canada","Germany","United Kingdom")
+
+options(scipen = 1000)
+
+df_drug_gender <- df_drug_gender %>% filter()
+gr1 <- ggplot(data = df_drug_gender %>% filter(!Entity %in% continents),
+              aes(y = `Total deaths from drug use disorders among males`, 
+x = `Total deaths from drug use disorders among females`)) + geom_point(color = "lightgray") +
+  geom_point(data = df_drug_gender %>% filter(!Entity %in% continents & Entity %in% imp_countries),
+             color = "steelblue",size = 3) +
+  geom_abline(intercept = 0,slope = 1,linetype = "dashed",alpha = 0.3) + 
+  geom_text_repel(data = df_drug_gender %>% filter(Entity %in% imp_countries),
+                  aes(label = Entity,
+                      hjust = -0.8,
+                      vjust = 1.8),
+                  size = 2.5,fontface = "bold") +
+  scale_x_continuous(transform = "log10", labels = scales::comma) +
+  scale_y_continuous(transform = "log10", labels = scales::comma) +
+  labs(x =     "Female deaths (log)",
+       y =     "Male deaths (log)",
+       title = "Share of deaths by gender due to drug use disorder",
+       subtitle = "Study across various countries indicated that the number of deaths as a result of drug use disorder was significantly high in the United States, with the number of deaths recorded in 2021 being as high as 100000. The trend across ",
+       caption = "Source: IHME, Global Burden of Disease") +
+  theme(legend.position = "top",
+    legend.title.position = "top",
+    legend.title = element_text(
+      color = text_col,
+      hjust = 0.5,
+      family = "text",
+      face = "bold",
+      size = rel(1),
+    ),
+    legend.text = element_text(
+      color = text_col,
+      family = "text",
+      size = rel(1),
+      face = "bold"
+    ),
+    plot.title            = element_text(
+      size                = rel(1),
+      family              = "title",
+      face                = "bold",
+      color               = title_col,
+      lineheight          = 0.3,
+      margin              = margin(t = 5, b = 5),
+      hjust               = 0.5
+    ),        
+    plot.subtitle         = element_markdown(
+      size                = rel(1), 
+      family              = 'subtitle',
+      color               = subtitle_col,
+      hjust               = 0,
+      lineheight          = 0.2, 
+      margin              = margin(t = 5, b = 1)
+    ),
+      plot.caption          = element_markdown(
+      size                = rel(0.5), 
+      family              = 'caption',
+      color               = caption_col,
+      lineheight          = 0.3,
+      hjust               = 1,
+      halign              = 0,
+      margin              = margin(t = 10, b = 10)
+    ),
+    axis.title = element_markdown(
+      size = rel(0.6)
+    ),
+    axis.text  = element_markdown(
+      size = rel(0.6)
+    )
+  ) 
+
+
+gr1
+```
+```{r}
+df_drug_gender %>% filter(Entity != continents) %>% arrange(-`Total deaths from drug use disorders among males`)
+```
+
 
