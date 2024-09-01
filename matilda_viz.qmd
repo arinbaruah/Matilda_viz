@@ -313,25 +313,32 @@ df_substance_deaths_age_long <- df_substance_deaths_age_long %>%  group_by(year)
 
 ```{r}
 
-age_exclude <- c("0-4","all","5-14")
+age_exclude <- c("all","0-4","5-14")
 df_substance_deaths_age_long <- df_substance_deaths_age_long %>% filter(!age_group_clean %in% age_exclude)
-df_substance_deaths_age_long_grouped <- df_substance_deaths_age_long %>% group_by(age_group_clean) %>% summarise(Total_deaths = sum(deaths))
+df_substance_deaths_age_long_grouped <- df_substance_deaths_age_long %>% group_by(age_group_clean,year) %>% summarise(Total_deaths = sum(deaths))
+
+df_substance_deaths_age_long_grouped$age_group_clean <- paste0(
+    df_substance_deaths_age_long_grouped$age_group_clean," yrs"
+)
 ```
 
 
 ```{r}
-
+#| warning: false
 title_text <- "How wide are the datasets in TidyTuesdayR repository?"
 subtitle_text <- "Wide datasets typically have more than 10 variables. With more number of variables, the curse of <br> dimensionality starts creeping in!"
 pal <- c("#ff6037", "#e6bc00", "#3a9234","#2E86C1")
 
 
+df_substance_deaths_age_long_grouped <- df_substance_deaths_age_long_grouped %>% filter(year >= 2016)
 gr3 <- ggplot(df_substance_deaths_age_long_grouped, aes(id = age_group_clean,area = Total_deaths,fill = Total_deaths)) +
   geom_circlepack() +
-  geom_circlepack_text(aes(label = age_group_clean, family = "title", fontface = "bold",color = "#f1fffe"),size = 6) +
-  geom_circlepack_text(aes(y = after_stat(y - 200), label = round(Total_deaths/10^6,1), 
+  geom_circlepack_text(aes(label = age_group_clean, family = "title", fontface = "bold"),color = "#f1fffe",size = 2.3,
+                       check_overlap = TRUE, family = "caption", lineheight = 0.9) +
+  geom_circlepack_text(aes(y = after_stat(y - 80), label = round(Total_deaths/10^6,1), 
                            family = "text",color = "white", 
-                           fontface = "bold", lineheight = 0.7),size = 4) +
+                           fontface = "bold", lineheight = 0.3),size = 3) +
+  facet_wrap(~year) +
   scale_color_identity() +
   theme_void() +
   # labs(caption = caption_text,
@@ -340,7 +347,7 @@ gr3 <- ggplot(df_substance_deaths_age_long_grouped, aes(id = age_group_clean,are
   theme(
     legend.position = "none",
     panel.spacing.y = unit(2, "lines"),
-    strip.text = element_text(color = pal[1], size = 3),
+    strip.text = element_text(color = "#2E4053", size = rel(1.5)),
     plot.margin = margin(10, 20, 10, 30),
     plot.title            = element_text(
       size                = rel(5.5),
@@ -368,7 +375,8 @@ gr3 <- ggplot(df_substance_deaths_age_long_grouped, aes(id = age_group_clean,are
       halign              = 0,
       margin              = margin(t = 10, b = 10)
     )
-  ) + coord_equal()
+  ) + scale_fill_continuous_tableau("Red") +
+  coord_equal()
 
 
 
