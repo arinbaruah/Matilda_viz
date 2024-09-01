@@ -333,9 +333,9 @@ pal <- c("#ff6037", "#e6bc00", "#3a9234","#2E86C1")
 df_substance_deaths_age_long_grouped <- df_substance_deaths_age_long_grouped %>% filter(year >= 2016)
 gr3 <- ggplot(df_substance_deaths_age_long_grouped, aes(id = age_group_clean,area = Total_deaths,fill = Total_deaths)) +
   geom_circlepack() +
-  geom_circlepack_text(aes(label = age_group_clean, family = "title", fontface = "bold"),color = "#f1fffe",size = 2.3,
+  geom_circlepack_text(aes(label = age_group_clean, family = "title", fontface = "bold"),color = "#f1fffe",size = 2.5,
                        check_overlap = TRUE, family = "caption", lineheight = 0.9) +
-  geom_circlepack_text(aes(y = after_stat(y - 80), label = round(Total_deaths/10^6,1), 
+  geom_circlepack_text(aes(y = after_stat(y - 90), label = round(Total_deaths/10^6,1), 
                            family = "text",color = "white", 
                            fontface = "bold", lineheight = 0.3),size = 3) +
   facet_wrap(~year) +
