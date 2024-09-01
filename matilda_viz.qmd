@@ -8,12 +8,14 @@ format: html
 library(tidyverse)
 library(ggthemes)
 library(ggplot2)
+library(janitor)
+library(ggcirclepack)
 ```
 
 ```{r}
 df_survey <- read_csv("data/survey.csv")
 df_substance_deaths <- read_csv("data/death-rate-from-mental-health-and-substance-use-disorders-who.csv")
-df_substance_deaths_age <- read_csv("data/death-rates-from-mental-and-substance-disorders-by-age-who.csv")
+df_substance_deaths_age <- read_csv("data/deaths-substance-disorders-age-who.csv")
 df_us_mental_deaths <- read_csv("data/US_mental_order_deaths.csv")
 df_drug_dependency <- read_csv("data/mental-health-as-risk-for-drug-dependency.csv")
 df_drug_gender <- read_csv("data/deaths-drug-use-disorders-by-sex.csv")
@@ -232,7 +234,8 @@ gr2 <- ggplot(data = df_substance_deaths %>% filter(Entity %in% tags) , aes(x = 
 ) + labs(x = "Year",
          y = "Deaths due to mental health and drug use disorder",
          title = "Global Trends in Deaths from Mental Health and Substance Use Disorders (2000-2022)",
-         subtitle = "The number of deaths due to mental health and substance use disorders per 100,000 individuals over the years <br> reveals a troubling trend for two specific countries:<span style='color: darkred;'> the United States and Canada </span>. While the death rates have <br> remained relatively stable across other continents, North America presents a stark contrast. Both countries have <br> experienced a significant increase in deaths, particularly in recent years. <strong> This rise has been notably steep <br> following the COVID-19 pandemic </strong>,which may have exacerbated mental health issues due to extended periods <br> of isolation and other pandemic-related stressors. ") +
+         subtitle = "The number of deaths due to mental health and substance use disorders per 100,000 individuals over the years <br> reveals a troubling trend for two specific countries:<span style='color: darkred;'> the United States and Canada </span>. While the death rates have <br> remained relatively stable across other continents, North America presents a stark contrast. Both countries have <br> experienced a significant increase in deaths, particularly in recent years. <strong> This rise has been notably steep <br> following the COVID-19 pandemic </strong>,which may have exacerbated mental health issues due to extended periods <br> of isolation and other pandemic-related stressors. ",
+         caption = "Source: World Health Organisation") +
 
     scale_color_manual(values = my_col |> darken(.25)) +
   theme(legend.position = "none",
@@ -267,7 +270,7 @@ gr2 <- ggplot(data = df_substance_deaths %>% filter(Entity %in% tags) , aes(x = 
       margin              = margin(t = 5, b = 1)
     ),
       plot.caption          = element_markdown(
-      size                = rel(0.5), 
+      size                = rel(0.8), 
       family              = 'caption',
       color               = caption_col,
       lineheight          = 0.3,
@@ -286,5 +289,92 @@ gr2 <- ggplot(data = df_substance_deaths %>% filter(Entity %in% tags) , aes(x = 
 
 gr2
 ggsave("images/Global_death_rate.png",gr2,dpi = 300,height = 6, width = 10)
+```
+
+```{r}
+df_substance_deaths_age <- df_substance_deaths_age %>% clean_names()
+df_substance_deaths_age_long <- df_substance_deaths_age %>% pivot_longer(cols = c(4:8),
+                                                                         values_to = "deaths",
+                                                                         names_to = "age_group")
+
+dim_order <- c("0-4","5-14", "15-49", "50-69",">=70","all")
+
+
+df_substance_deaths_age_long <- df_substance_deaths_age_long %>%  group_by(year) %>% mutate(age_group_clean = case_match(age_group,           "deaths_from_substance_use_disorders_among_both_sexes_aged_0_4_year_olds" ~ "0-4", 
+                                                                                                                         "deaths_from_substance_use_disorders_among_both_sexes_aged_5_14_year_olds" ~ "5-14", 
+                                                                                                                         "deaths_from_substance_use_disorders_among_both_sexes_aged_15_49_year_olds" ~ "15-49", 
+                                                                                                                         "deaths_from_substance_use_disorders_among_both_sexes_aged_50_69_year_olds" ~ "50-69",
+                                                                                                                         "deaths_from_substance_use_disorders_among_both_sexes_aged_70_year_olds" ~ ">=70",
+                                                                                  .default = "all")) %>%
+   mutate(age_group_clean = factor(age_group_clean, levels = dim_order))
+
+```
+
+
+```{r}
+
+age_exclude <- c("0-4","all","5-14")
+df_substance_deaths_age_long <- df_substance_deaths_age_long %>% filter(!age_group_clean %in% age_exclude)
+df_substance_deaths_age_long_grouped <- df_substance_deaths_age_long %>% group_by(age_group_clean) %>% summarise(Total_deaths = sum(deaths))
+```
+
+
+```{r}
+
+title_text <- "How wide are the datasets in TidyTuesdayR repository?"
+subtitle_text <- "Wide datasets typically have more than 10 variables. With more number of variables, the curse of <br> dimensionality starts creeping in!"
+pal <- c("#ff6037", "#e6bc00", "#3a9234","#2E86C1")
+
+
+gr3 <- ggplot(df_substance_deaths_age_long_grouped, aes(id = age_group_clean,area = Total_deaths,fill = Total_deaths)) +
+  geom_circlepack() +
+  geom_circlepack_text(aes(label = age_group_clean, family = "title", fontface = "bold",color = "#f1fffe"),size = 6) +
+  geom_circlepack_text(aes(y = after_stat(y - 200), label = round(Total_deaths/10^6,1), 
+                           family = "text",color = "white", 
+                           fontface = "bold", lineheight = 0.7),size = 4) +
+  scale_color_identity() +
+  theme_void() +
+  # labs(caption = caption_text,
+  #      title = title_text,
+  #      subtitle = subtitle_text) +
+  theme(
+    legend.position = "none",
+    panel.spacing.y = unit(2, "lines"),
+    strip.text = element_text(color = pal[1], size = 3),
+    plot.margin = margin(10, 20, 10, 30),
+    plot.title            = element_text(
+      size                = rel(5.5),
+      family              = "title",
+      face                = "bold",
+      color               = title_col,
+      lineheight          = 0.3,
+      margin              = margin(t = 5, b = 5),
+      hjust               = 0.5
+    ),        
+    plot.subtitle         = element_markdown(
+      size                = rel(2.5), 
+      family              = 'subtitle',
+      color               = subtitle_col,
+      hjust               = 0,
+      lineheight          = 0.1, 
+      margin              = margin(t = 5, b = 1)
+    ),
+    plot.caption          = element_markdown(
+      size                = rel(2), 
+      family              = 'caption',
+      color               = caption_col,
+      lineheight          = 0.3,
+      hjust               = 0.5,
+      halign              = 0,
+      margin              = margin(t = 10, b = 10)
+    )
+  ) + coord_equal()
+
+
+
+
+
+gr3
+
 ```
 

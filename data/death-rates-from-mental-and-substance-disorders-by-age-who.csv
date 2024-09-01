@@ -1,9 +1,4 @@
-Entity,Code,Year,Death rate from mental and substance use disorders among both sexes aged 0-4 year olds
-,Death rate from mental and substance use disorders among both sexes aged 5-14 year olds
-,Death rate from mental and substance use disorders among both sexes aged 15-49 year olds
-,Death rate from mental and substance use disorders among both sexes aged 50-69 year olds
-,Death rate from mental and substance use disorders among both sexes aged 70+ year olds
-,Death rate from mental and substance use disorders among both sexes
+Entity,Code,Year,Death rate from mental and substance use disorders among both sexes aged 0-4 year olds,Death rate from mental and substance use disorders among both sexes aged 5-14 year olds,Death rate from mental and substance use disorders among both sexes aged 15-49 year olds,Death rate from mental and substance use disorders among both sexes aged 50-69 year olds,Death rate from mental and substance use disorders among both sexes aged 70+ year olds,Death rate from mental and substance use disorders among both sexes
 Afghanistan,AFG,2000,0,0,2.4450467,4.111707,4.6793327,1.37
 Afghanistan,AFG,2001,0,0,2.489481,4.228982,4.7863374,1.4
 Afghanistan,AFG,2002,0,0,2.445861,4.2384844,4.7837553,1.38
