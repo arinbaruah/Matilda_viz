@@ -403,7 +403,7 @@ subtitle_text <- "A high-pressure work environment can significantly impact the 
 work_conditions <- c("Generalized anxiety disorder (GAD)","Major depression",
                      "Social phobia","Any Anxiety Disorder","Attention deficit hyperactivity (ADHD)")
 
-ggplot(data = df_drug_dependency,aes(x = increased_risk_of_illicit_drug_dependency,
+gr4 <- ggplot(data = df_drug_dependency,aes(x = increased_risk_of_illicit_drug_dependency,
                                      y = reorder(entity,increased_risk_of_illicit_drug_dependency))) + 
   geom_col(fill = "lightgray") + 
   geom_col(data = df_drug_dependency %>% filter(entity %in% work_conditions) ,fill = "#CD5C5C") +
@@ -465,6 +465,7 @@ ggplot(data = df_drug_dependency,aes(x = increased_risk_of_illicit_drug_dependen
       family = "caption"
     )
   ) 
-
+gr4
+ggsave("images/drug_dependency.jpeg",gr4,dpi = 300,height = 6, width = 10)
 ```
 
