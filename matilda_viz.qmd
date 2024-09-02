@@ -394,3 +394,77 @@ gr3
 ggsave("images/Global_death_rate_age.jpeg",gr3,dpi = 300,height = 6, width = 10)
 ```
 
+```{r}
+df_drug_dependency <- df_drug_dependency %>% clean_names()
+
+title_text <- "Elevated Risk of Substance Dependence Among Professionals in High-Stress Work Environments"
+subtitle_text <- "A high-pressure work environment can significantly impact the mental well-being <br> of professionals, often making them vulnerable to mental health disorders. <br> Statistics show a strong correlation between developing a mental health <br> condition and subsequent substance dependence. Among working professionals, <br> the most common mental health disorders include <strong> ADHD, Social Phobia, Major Depression, <br> and Generalized Anxiety Disorder </strong>. The values presented indicate the likelihood <br> of individuals who develop one of these conditions also turning to substance use as a coping mechanism. A person with a diagnosed ADHD condition is <span style='color: darkred;'>5.2 times likely </span> to fall victim to substance use."
+
+work_conditions <- c("Generalized anxiety disorder (GAD)","Major depression",
+                     "Social phobia","Any Anxiety Disorder","Attention deficit hyperactivity (ADHD)")
+
+ggplot(data = df_drug_dependency,aes(x = increased_risk_of_illicit_drug_dependency,
+                                     y = reorder(entity,increased_risk_of_illicit_drug_dependency))) + 
+  geom_col(fill = "lightgray") + 
+  geom_col(data = df_drug_dependency %>% filter(entity %in% work_conditions) ,fill = "#CD5C5C") +
+  geom_text(aes(label = increased_risk_of_illicit_drug_dependency,hjust = 1,fontface = "bold"),color = "white") +
+  labs(x = "Risk of substance dependency",
+       y = "Diagnosed conditions",
+       title = title_text,
+       subtitle = subtitle_text,
+       caption = "Source: Swendsen et al. (2010)") +
+  theme_minimal() +
+  theme(legend.position = "none",
+    legend.title = element_text(
+      color = text_col,
+      hjust = 0.5,
+      family = "text",
+      face = "bold",
+      size = rel(1),
+    ),
+    legend.text = element_text(
+      color = text_col,
+      family = "text",
+      size = rel(1),
+      face = "bold"
+    ),
+    plot.title            = element_text(
+      size                = rel(1.1),
+      family              = "title",
+      face                = "bold",
+      color               = title_col,
+      lineheight          = 0.3,
+      margin              = margin(t = 5, b = 5),
+      hjust               = 0.5
+    ),        
+    plot.subtitle         = element_markdown(
+      size                = rel(0.9), 
+      family              = 'subtitle',
+      color               = subtitle_col,
+      hjust               = 0,
+      lineheight          = 0.2, 
+      margin              = margin(t = 5, b = 1)
+    ),
+      plot.caption          = element_markdown(
+      size                = rel(0.8), 
+      family              = 'caption',
+      color               = caption_col,
+      lineheight          = 0.3,
+      hjust               = 1,
+      halign              = 0,
+      margin              = margin(t = 10, b = 10)
+    ),
+    axis.title = element_markdown(
+      size = rel(0.7),
+      family = "caption",
+      face = "bold"
+    ),
+    axis.text  = element_markdown(
+      size = rel(0.7),
+      face = "bold",
+      family = "caption"
+    )
+  ) 
+
+```
+
