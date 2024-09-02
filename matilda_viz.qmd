@@ -61,6 +61,7 @@ font_add_google("DM Serif Display", regular.wt = 400, family = "title")
 font_add_google("Urbanist", regular.wt = 400, family = "subtitle")  
 font_add_google("Quattrocento Sans", regular.wt = 400, family = "text")        
 font_add_google("Merriweather", regular.wt = 400,family = "caption")
+
 showtext_auto(enable = TRUE)  
 
 
@@ -183,7 +184,7 @@ x = `Total deaths from drug use disorders among females`)) + geom_point(color = 
 
 
 gr1
-ggsave("images/Gender_death_rate.png",gr1,dpi = 300,height = 6, width = 10)
+ggsave("images/Gender_death_rate.jpeg",gr1,dpi = 300,height = 6, width = 10)
 ```
 ```{r}
 df_drug_gender %>% filter(Entity != continents) %>% arrange(-`Total deaths from drug use disorders among males`)
@@ -288,7 +289,7 @@ gr2 <- ggplot(data = df_substance_deaths %>% filter(Entity %in% tags) , aes(x = 
   ) + xlim(c(2000,2022)) 
 
 gr2
-ggsave("images/Global_death_rate.png",gr2,dpi = 300,height = 6, width = 10)
+ggsave("images/Global_death_rate.jpeg",gr2,dpi = 300,height = 6, width = 10)
 ```
 
 ```{r}
@@ -320,37 +321,48 @@ df_substance_deaths_age_long_grouped <- df_substance_deaths_age_long %>% group_b
 df_substance_deaths_age_long_grouped$age_group_clean <- paste0(
     df_substance_deaths_age_long_grouped$age_group_clean," yrs"
 )
+
+df_substance_deaths_age_long_grouped <- df_substance_deaths_age_long_grouped %>% filter(year >= 2016)
+df_substance_deaths_age_long_grouped <- df_substance_deaths_age_long_grouped %>% 
+                                          mutate(Total_deaths = Total_deaths/10^6) %>% 
+                                          mutate(Total_deaths = round(Total_deaths,1)) 
+
+df_substance_deaths_age_long_grouped$Total_deaths_label <- paste0(
+    df_substance_deaths_age_long_grouped$Total_deaths," mil"
+)
 ```
 
 
 ```{r}
 #| warning: false
-title_text <- "How wide are the datasets in TidyTuesdayR repository?"
-subtitle_text <- "Wide datasets typically have more than 10 variables. With more number of variables, the curse of <br> dimensionality starts creeping in!"
-pal <- c("#ff6037", "#e6bc00", "#3a9234","#2E86C1")
+title_text <- "Persistent Trends in Deaths from Mental Health and Substance Use Disorders <br> Among Middle-Aged Groups"
+
+subtitle_text <- "A closer examination of deaths due to mental health and substance use disorders reveals <br> that middle-aged individuals, particularly those between 15-49 years, have <br> consistently  experienced the highest mortality rates. In recent years, the death toll in this age group <br> has reached up to half a million annually, closely followed by those aged 50-69 years. A significant portion of these deaths occur among the working-age population, suggesting that professional pressures and stress could be major contributing factors to the decline in mental health, particularly for individuals aged 15-49."
 
 
-df_substance_deaths_age_long_grouped <- df_substance_deaths_age_long_grouped %>% filter(year >= 2016)
 gr3 <- ggplot(df_substance_deaths_age_long_grouped, aes(id = age_group_clean,area = Total_deaths,fill = Total_deaths)) +
   geom_circlepack() +
-  geom_circlepack_text(aes(label = age_group_clean, family = "title", fontface = "bold"),color = "#f1fffe",size = 2.5,
-                       check_overlap = TRUE, family = "caption", lineheight = 0.9) +
-  geom_circlepack_text(aes(y = after_stat(y - 90), label = round(Total_deaths/10^6,1), 
+    geom_circlepack_text( aes(y = after_stat(y+ 0.1),
+                              label = Total_deaths_label),
                            family = "text",color = "white", 
-                           fontface = "bold", lineheight = 0.3),size = 3) +
+                           fontface = "bold", lineheight = 0.3,size = 4.7) +
+  geom_circlepack_text(aes(label = age_group_clean),color = "#f1fffe",size = 2.5,
+                       check_overlap = TRUE,family = "caption", lineheight = 0.9) +
   facet_wrap(~year) +
   scale_color_identity() +
   theme_void() +
-  # labs(caption = caption_text,
-  #      title = title_text,
-  #      subtitle = subtitle_text) +
+   labs(title = title_text,
+        subtitle = subtitle_text,
+        caption = "Source: World Health Organisation (2024)") +
   theme(
     legend.position = "none",
     panel.spacing.y = unit(2, "lines"),
-    strip.text = element_text(color = "#2E4053", size = rel(1.5)),
+    strip.text = element_text(color = "#2E4053", 
+                              size = rel(1.5),
+                              family = "subtitle"),
     plot.margin = margin(10, 20, 10, 30),
-    plot.title            = element_text(
-      size                = rel(5.5),
+    plot.title            = element_markdown(
+      size                = rel(1.3),
       family              = "title",
       face                = "bold",
       color               = title_col,
@@ -359,7 +371,7 @@ gr3 <- ggplot(df_substance_deaths_age_long_grouped, aes(id = age_group_clean,are
       hjust               = 0.5
     ),        
     plot.subtitle         = element_markdown(
-      size                = rel(2.5), 
+      size                = rel(1), 
       family              = 'subtitle',
       color               = subtitle_col,
       hjust               = 0,
@@ -367,22 +379,18 @@ gr3 <- ggplot(df_substance_deaths_age_long_grouped, aes(id = age_group_clean,are
       margin              = margin(t = 5, b = 1)
     ),
     plot.caption          = element_markdown(
-      size                = rel(2), 
+      size                = rel(0.8), 
       family              = 'caption',
       color               = caption_col,
       lineheight          = 0.3,
-      hjust               = 0.5,
+      hjust               = 1,
       halign              = 0,
       margin              = margin(t = 10, b = 10)
     )
-  ) + scale_fill_continuous_tableau("Red") +
+  ) + scale_fill_continuous_tableau(palette = "Classic Red") +
   coord_equal()
 
-
-
-
-
 gr3
-
+ggsave("images/Global_death_rate_age.jpeg",gr3,dpi = 300,height = 6, width = 10)
 ```
 
