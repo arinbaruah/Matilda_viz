@@ -469,3 +469,186 @@ gr4
 ggsave("images/drug_dependency.jpeg",gr4,dpi = 300,height = 6, width = 10)
 ```
 
+
+```{r}
+cigs_sales <- read_csv(here::here("data/sales-of-cigarettes-per-adult-per-day.csv"), show_col_types = FALSE)
+
+cigs_sales_tidy <- cigs_sales %>%
+                   rename(cigs_sales_daily = `Sales of cigarettes per adult per day (International Smoking Statistics (2017))`) %>%
+                   select(Entity, Year, cigs_sales_daily)
+
+lung_cancer <- read_csv(here::here("data/lung-cancer-deaths-per-100000-by-sex-1950-2002.csv"), show_col_types = FALSE)
+
+lung_cancer_tidy <- lung_cancer %>% select(!Code) %>%
+                                    pivot_longer(cols = -1:-2,
+                                                 names_to = "gender",
+                                                 values_to = "death_rate") %>%
+                                    mutate(gender = as.character(gender)) %>%
+                                    mutate(gender = str_replace_all(gender, "age-standardized_death_rate_per_100k_", ""))
+                                    
+lc_summarised <- lung_cancer_tidy %>%
+                 select(Year, death_rate) %>%
+                 group_by(Year) %>%
+                 summarise(avg_death_rate = round(mean(death_rate),2)) %>%
+                 arrange(Year)
+
+
+lc_cigs_summarised <- cigs_sales_tidy %>%
+                        select(Year, cigs_sales_daily) %>%
+                        group_by(Year) %>%
+                        summarise(cigs_sales_daily = mean(cigs_sales_daily)) %>%
+                        left_join(lc_summarised, by = "Year") %>%
+                        filter(Year %in% 1950:2015)
+
+
+scale = 2
+
+
+```
+
+```{r}
+
+library(ggplot2)
+
+
+title_text <- "Turning the Tide: Decreasing Cigarette Consumption and Deaths Among Smokers"
+  
+subtitle_text <- "Smoking tobacco-based products remains the most widely abused addictive substance, particularly among  <br> individuals struggling with mental health issues. The harmful effects of smoking are well-documented, with <br> lung cancer  being a leading cause of death among heavy smokers. However, there is a positive trend emerging: <br> the average number of cigarettes sold per adult (aged 15 and above) has been steadily declining since 1974. <br> This decline is accompanied by a notable reduction in annual death rates among smokers. If this trend continues, <br> both the average number of cigarettes sold per adult and the related death rates are expected to reach record <br> lows in the coming years. This marks a significant step forward in the fight against substance abuse and <br> its detrimental health effects."
+
+
+cig_sales <- diff(range(lc_cigs_summarised_long$value[lc_cigs_summarised_long$metric == "cigs_sales_daily"]))
+avg_death <- diff(range(lc_cigs_summarised_long$value[lc_cigs_summarised_long$metric == "avg_death_rate"]))
+
+cig_sales_future_model <- lm(value ~ Year, data = lc_cigs_summarised_long %>% filter(metric == "cigs_sales_daily" & Year>=1980))
+avg_death_future_model <- lm(value ~ Year, data = lc_cigs_summarised_long %>% filter(metric == "avg_death_rate" & Year>=1980))
+
+
+scale_factor <- cig_sales / avg_death
+
+future_years <- data.frame(Year = seq(2016, 2035))
+
+cigs_sales_future <- tibble(Year = seq(2016, 2035),
+                            metric = "Cigarette sales per adult",
+                            value = predict(cig_sales_future_model, 
+                                                          newdata = future_years))
+avg_death_future <- tibble(Year = seq(2016, 2035),
+                           metric = "Average death rate",
+                            value = predict(avg_death_future_model, 
+                                                          newdata = future_years))
+
+lc_cigs_summarised_long <- rbind(lc_cigs_summarised_long,cigs_sales_future,avg_death_future)
+
+gr5 <- ggplot(lc_cigs_summarised_long, aes(x = Year)) +
+  # First metric
+  geom_line(aes(y = value,linetype = metric), 
+            data = lc_cigs_summarised_long %>% filter(metric == "cigs_sales_daily"),linewidth = 1.2) +
+  
+  # Second metric on secondary axis
+  geom_line(aes(y = value * scale_factor,linetype = metric), 
+            data = lc_cigs_summarised_long %>% filter(metric == "avg_death_rate"),linewidth = 1.2) +
+    geom_line(aes(y = value * scale_factor,color = metric), 
+            data = lc_cigs_summarised_long %>% filter(metric == "Average death rate"),linewidth = 1.2) +
+    geom_line(aes(y = value,color = metric), 
+            data = lc_cigs_summarised_long %>% filter(metric == "Cigarette sales per adult"),linewidth = 1.2) +
+  geom_point(
+    data = filter(lc_cigs_summarised_long),
+    aes(x = 1974,y = 7.7),
+    size = 4,
+    color = "darkred"
+  ) +
+    geom_segment(aes(x = 1973.5,
+                   y = 7.6,
+                   xend = 1965,
+                   yend = 8.7),
+               linewidth= 0.2) +
+  annotate(geom = "text",
+           x = 1965,
+           y = 9,
+           size = 2.5,
+           label = 'First reported decrease in global cigarette sales in 1974',
+           fontface = "bold",
+          family = "text") +
+  geom_point(
+    data = filter(lc_cigs_summarised_long),
+    aes(x = 1988,y = 6.1),
+    size = 4,
+    color = "darkred"
+  ) +
+    geom_segment(aes(x = 1988,
+                   y = 6.1,
+                   xend = 1980,
+                   yend = 3.5),
+               linewidth= 0.2) +
+  annotate(geom = "text",
+           x = 1980,
+           y = 3.3,
+           size = 2.5,
+           label = 'Decreasing trend in annual smoking death rates',
+           fontface = "bold",
+          family = "text") +
+  
+  scale_color_manual(values = c(`Average death rate` = "darkred",`Cigarette sales per adult` = "orange")) +
+  scale_y_continuous(
+    name = "Average daily cigarette sales per adult", 
+    sec.axis = sec_axis(~ . / scale_factor, name = "Average death rate (%)")) + 
+  guides(linetype = FALSE) +
+  labs(x = "Year",
+       color = "Projections",
+       title = title_text,
+       subtitle = subtitle_text,
+       caption = "Source: International Smoking Statistics (2016)") +
+  theme_minimal() +
+  theme(legend.position = "bottom",
+    legend.title = element_text(
+      color = text_col,
+      hjust = 0.5,
+      family = "text",
+      face = "bold",
+      size = rel(1),
+    ),
+    legend.text = element_text(
+      color = text_col,
+      family = "text",
+      size = rel(1),
+      face = "bold"
+    ),
+    plot.title            = element_text(
+      size                = rel(1.1),
+      family              = "title",
+      face                = "bold",
+      color               = title_col,
+      lineheight          = 0.3,
+      margin              = margin(t = 5, b = 5),
+      hjust               = 0.5
+    ),        
+    plot.subtitle         = element_markdown(
+      size                = rel(0.9), 
+      family              = 'subtitle',
+      color               = subtitle_col,
+      hjust               = 0,
+      lineheight          = 0.2, 
+      margin              = margin(t = 5, b = 1)
+    ),
+      plot.caption          = element_markdown(
+      size                = rel(0.8), 
+      family              = 'caption',
+      color               = caption_col,
+      lineheight          = 0.3,
+      hjust               = 1,
+      halign              = 0,
+      margin              = margin(t = 10, b = 10)
+    ),
+    axis.title = element_markdown(
+      size = rel(0.7),
+      family = "caption",
+      face = "bold"
+    ),
+    axis.text  = element_markdown(
+      size = rel(0.7),
+      face = "bold",
+      family = "caption"
+    )
+  ) 
+gr5
+ggsave("images/cig_sales.jpeg",gr5,dpi = 300,height = 6, width = 10)
+```
