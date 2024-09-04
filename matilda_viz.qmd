@@ -19,8 +19,8 @@ df_substance_deaths_age <- read_csv("data/deaths-substance-disorders-age-who.csv
 df_us_mental_deaths <- read_csv("data/US_mental_order_deaths.csv")
 df_drug_dependency <- read_csv("data/mental-health-as-risk-for-drug-dependency.csv")
 df_drug_gender <- read_csv("data/deaths-drug-use-disorders-by-sex.csv")
-df_drug_deaths <- tibble(drug = c("Tobacco","Alcohol use (Indirect)","Illicit drugs","Alcohol use (Direct)"),
-                         deaths = c(7.25*10^6,1.81*10^6,600638,158469)) # Deaths in 2021 by IHME, Global burden of disease
+df_drug_deaths <- tibble(drug = c("Tobacco","Alcohol use","Illicit drugs"),
+                         deaths = c(7.25*10^6,2*10^6,600638)) # Deaths in 2021 by IHME, Global burden of disease
 df_pop <- read_csv("data/population.csv",skip = 3)
 df_overdose <- read_csv("data/drug-overdose-death-rates.csv")
 ```
@@ -472,35 +472,83 @@ ggsave("images/drug_dependency.jpeg",gr4,dpi = 300,height = 6, width = 10)
 
 
 ```{r}
-df_drug_deaths
+library(treemapify)
+
+
+title_text <- "Tobacco’s Toll: Addressing the Leading Cause of Global Substance-Related Deaths"
+
+subtitle_text <- "In 2021, the global annual number of deaths caused by substance use highlighted <strong> tobacco as the leading cause </strong>, with <br> a  staggering <span style='color: darkred;'> 7.2 million deaths </span>. Alcohol followed as the second highest at 2 million deaths, and illicit drugs accounted for <br> 0.6 million deaths. The overwhelming number of deaths from tobacco, primarily due to smoking, suggests that a <br> significant portion of the global population remains dependent on it. Smoking is often the first substance people <br> become addicted to, often triggered by mental health challenges such as stress. The fact that tobacco-related deaths <br> are more than three times higher than the next leading cause of substance-related deaths underscores the urgent <br> need for focused efforts to limit easy access to tobacco products, such as cigarettes, and to promote cessation <br> programs and awareness campaigns to combat tobacco addiction."
+
+gr7 <- ggplot(df_drug_deaths, aes(area = deaths, fill = deaths,
+               label = paste0(drug,"\n","\n", round(deaths/10^6,1)," mil deaths"),
+               size = 2.5,
+               family = "text")) +
+  geom_treemap(color = "black",size = 5) +
+  geom_treemap_text(colour = "#F2F3F4",
+                    place = "centre",
+                    size = 15) +
+  scale_fill_continuous_tableau(palette = "Red") +
+  labs(title = title_text,
+       subtitle = subtitle_text,
+       caption = "Source: IHME Global Burden of Disease (2021)") +
+   theme_minimal() +
+  theme(legend.position = "none",
+    legend.title = element_text(
+      color = text_col,
+      hjust = 0.5,
+      family = "text",
+      face = "bold",
+      size = rel(1),
+    ),
+    legend.text = element_text(
+      color = text_col,
+      family = "text",
+      size = rel(1),
+      face = "bold"
+    ),
+    plot.title            = element_text(
+      size                = rel(1.1),
+      family              = "title",
+      face                = "bold",
+      color               = title_col,
+      lineheight          = 0.3,
+      margin              = margin(t = 5, b = 5),
+      hjust               = 0.5
+    ),        
+    plot.subtitle         = element_markdown(
+      size                = rel(0.9), 
+      family              = 'subtitle',
+      color               = subtitle_col,
+      hjust               = 0,
+      lineheight          = 0.2, 
+      margin              = margin(t = 5, b = 1)
+    ),
+      plot.caption          = element_markdown(
+      size                = rel(0.8), 
+      family              = 'caption',
+      color               = caption_col,
+      lineheight          = 0.3,
+      hjust               = 1,
+      halign              = 0,
+      margin              = margin(t = 10, b = 10)
+    ),
+    axis.title = element_markdown(
+      size = rel(0.7),
+      family = "caption",
+      face = "bold"
+    ),
+    axis.text  = element_markdown(
+      size = rel(0.7),
+      face = "bold",
+      family = "caption"
+    )
+  ) 
+gr7 
+ggsave("images/tobacco_deaths.jpeg",gr7,dpi = 300,height = 6, width = 10)
+
 ```
 
 
-
-
-```{r}
-
-library(ggplot2)
-library(ggalluvial)
-
-# Load Titanic dataset
-data("titanic", package = "datasets")
-
-# Create a data frame for the plot
-titanic_data <- as.data.frame(Titanic)
-
-# Alluvial Plot
-ggplot(data = titanic_data,
-       aes(axis1 = Class, axis2 = Sex, axis3 = Age, y = Freq)) +
-  geom_alluvium(aes(fill = Survived)) +
-  geom_stratum() +
-  geom_text(stat = "stratum", aes(label = after_stat(stratum))) +
-  scale_x_discrete(limits = c("Class", "Sex", "Age"), expand = c(0.15, 0.05)) +
-  labs(title = "Survival of Titanic Passengers by Class, Sex, and Age",
-       x = "Demographics",
-       y = "Frequency") +
-  theme_minimal()
-```
 
 ```{r}
 
@@ -723,7 +771,7 @@ df_overdose_long <- df_overdose_long %>% mutate(drug_type_clean = case_match(dru
                                                                             "Synthetic opioids death rates (CDC WONDER)" ~ "Synthetic Opioids"))
 
 
-df_overdose_long$drug_type_clean <- factor(df_overdose_long$drug_type_clean,levels = c("Prescription Opioids","Heroin",
+df_overdose_long$drug_type_clean <- factor(df_overdose_long$drug_type_clean,levels = c("Heroin","Prescription Opioids",
                                                                                        "Cocaine","Other Opioids","Synthetic Opioids")) 
 
 cols <- c("Other Opioids" = "darkred", 
@@ -733,10 +781,11 @@ cols <- c("Other Opioids" = "darkred",
           "Heroin" = "#ABEBC6")
 
 title_text <- "Rising Overdose Deaths: An Urgent Call for Action on Illicit Drug Abuse"
-subtitle_text <- "The recent surge in overdose deaths in the United States, particularly due to illicit drugs like opioids, <br> heroin, and cocaine, is deeply concerning. This trend suggests that more people are increasingly <br> turning to these substances, potentially driven by underlying issues such as mental health disorders, <br> which lead to addiction and, ultimately, fatal outcomes. In recent years, the <strong> annual death rate due to <br> overdoses has climbed to 20 per 100,000 people </strong> and continues to rise at an alarming pace. <br> This upward trajectory highlights an <span style='color: darkred;'>urgent need for targeted interventions to address the growing number of drug users </span> and prevent further loss of life due to substance abuse."
+subtitle_text <- "The recent surge in overdose deaths in the United States, particularly due to illicit drugs like opioids, <br> heroin, and cocaine, is deeply concerning. This trend suggests that more people are increasingly <br> turning to these substances, potentially driven by underlying issues such as mental health disorders, <br> which lead to addiction and, ultimately, fatal outcomes. In recent years, the <strong> annual death rate due to <br> overdoses has climbed to 20 per 100,000 people </strong> and continues to rise at an alarming pace. <br> This upward trajectory highlights an <span style='color: darkred;'>urgent need for targeted interventions to address the growing <br> number of drug users </span> and prevent further loss of life due to substance abuse."
 
 gr6 <- ggplot(data = df_overdose_long,aes(x = Year,y = death_rate)) + geom_line() +
-  geom_area(alpha = 0.4,aes(fill = drug_type_clean)) + facet_wrap(~drug_type_clean,nrow = 2) + 
+  geom_area(alpha = 0.4,aes(fill = drug_type_clean)) + 
+  facet_wrap(~drug_type_clean,nrow = 1) + 
   geom_point(data = df_overdose_long %>% filter(Year == 2020),aes(x = Year,y = death_rate),size = 3,color = "#21618C") +
   scale_fill_manual(values = cols) +
     coord_cartesian(clip = 'off') +
@@ -795,12 +844,14 @@ gr6 <- ggplot(data = df_overdose_long,aes(x = Year,y = death_rate)) + geom_line(
       face = "bold"
     ),
     axis.text  = element_markdown(
-      size = rel(0.7),
+      size = rel(0.5),
+      angle = 15,
       face = "bold",
       family = "caption"
     )
   ) 
   
 gr6
+ggsave("images/overdose_deaths.jpeg",gr6,dpi = 300,height = 6, width = 10)
 ```
 
