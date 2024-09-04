@@ -19,9 +19,10 @@ df_substance_deaths_age <- read_csv("data/deaths-substance-disorders-age-who.csv
 df_us_mental_deaths <- read_csv("data/US_mental_order_deaths.csv")
 df_drug_dependency <- read_csv("data/mental-health-as-risk-for-drug-dependency.csv")
 df_drug_gender <- read_csv("data/deaths-drug-use-disorders-by-sex.csv")
-df_drug_deaths <- tibble(drug = c("Tobacco","Alcohol use (Indirect)","Illicit drugs","Alcogol use (Direct)"),
+df_drug_deaths <- tibble(drug = c("Tobacco","Alcohol use (Indirect)","Illicit drugs","Alcohol use (Direct)"),
                          deaths = c(7.25*10^6,1.81*10^6,600638,158469)) # Deaths in 2021 by IHME, Global burden of disease
 df_pop <- read_csv("data/population.csv",skip = 3)
+df_overdose <- read_csv("data/drug-overdose-death-rates.csv")
 ```
 
 ```{r}
@@ -471,6 +472,53 @@ ggsave("images/drug_dependency.jpeg",gr4,dpi = 300,height = 6, width = 10)
 
 
 ```{r}
+df_drug_deaths
+```
+
+
+
+
+```{r}
+
+library(ggplot2)
+library(ggalluvial)
+
+# Load Titanic dataset
+data("titanic", package = "datasets")
+
+# Create a data frame for the plot
+titanic_data <- as.data.frame(Titanic)
+
+# Alluvial Plot
+ggplot(data = titanic_data,
+       aes(axis1 = Class, axis2 = Sex, axis3 = Age, y = Freq)) +
+  geom_alluvium(aes(fill = Survived)) +
+  geom_stratum() +
+  geom_text(stat = "stratum", aes(label = after_stat(stratum))) +
+  scale_x_discrete(limits = c("Class", "Sex", "Age"), expand = c(0.15, 0.05)) +
+  labs(title = "Survival of Titanic Passengers by Class, Sex, and Age",
+       x = "Demographics",
+       y = "Frequency") +
+  theme_minimal()
+```
+
+```{r}
+
+df_drug_deaths$main <- "Deaths due to substance abuse"
+
+
+```
+
+
+
+
+
+
+
+
+
+
+```{r}
 cigs_sales <- read_csv(here::here("data/sales-of-cigarettes-per-adult-per-day.csv"), show_col_types = FALSE)
 
 cigs_sales_tidy <- cigs_sales %>%
@@ -506,7 +554,16 @@ scale = 2
 
 ```
 
+
+
+
+
+
+
+
+
 ```{r}
+#| warning: false
 
 library(ggplot2)
 
@@ -652,3 +709,98 @@ gr5 <- ggplot(lc_cigs_summarised_long, aes(x = Year)) +
 gr5
 ggsave("images/cig_sales.jpeg",gr5,dpi = 300,height = 6, width = 10)
 ```
+
+
+
+```{r}
+df_overdose_long <- df_overdose %>% pivot_longer(cols = c(4:8),names_to = "drug_type",values_to = "death_rate")
+
+
+df_overdose_long <- df_overdose_long %>% mutate(drug_type_clean = case_match(drug_type,"Any opioid death rates (CDC WONDER)" ~ "Other Opioids",
+                                                                            "Cocaine overdose death rates (CDC WONDER)" ~ "Cocaine",
+                                                                            "Heroin overdose death rates (CDC WONDER)" ~ "Heroin",
+                                                                            "Prescription Opioids death rates (US CDC WONDER)" ~ "Prescription Opioids",
+                                                                            "Synthetic opioids death rates (CDC WONDER)" ~ "Synthetic Opioids"))
+
+
+df_overdose_long$drug_type_clean <- factor(df_overdose_long$drug_type_clean,levels = c("Prescription Opioids","Heroin",
+                                                                                       "Cocaine","Other Opioids","Synthetic Opioids")) 
+
+cols <- c("Other Opioids" = "darkred", 
+          "Cocaine" = "#E59866",
+          "Prescription Opioids" = "#F9E79F",
+          "Synthetic Opioids" = "darkred",
+          "Heroin" = "#ABEBC6")
+
+title_text <- "Rising Overdose Deaths: An Urgent Call for Action on Illicit Drug Abuse"
+subtitle_text <- "The recent surge in overdose deaths in the United States, particularly due to illicit drugs like opioids, <br> heroin, and cocaine, is deeply concerning. This trend suggests that more people are increasingly <br> turning to these substances, potentially driven by underlying issues such as mental health disorders, <br> which lead to addiction and, ultimately, fatal outcomes. In recent years, the <strong> annual death rate due to <br> overdoses has climbed to 20 per 100,000 people </strong> and continues to rise at an alarming pace. <br> This upward trajectory highlights an <span style='color: darkred;'>urgent need for targeted interventions to address the growing number of drug users </span> and prevent further loss of life due to substance abuse."
+
+gr6 <- ggplot(data = df_overdose_long,aes(x = Year,y = death_rate)) + geom_line() +
+  geom_area(alpha = 0.4,aes(fill = drug_type_clean)) + facet_wrap(~drug_type_clean,nrow = 2) + 
+  geom_point(data = df_overdose_long %>% filter(Year == 2020),aes(x = Year,y = death_rate),size = 3,color = "#21618C") +
+  scale_fill_manual(values = cols) +
+    coord_cartesian(clip = 'off') +
+  labs(x = "Year",y = "Annual death rate <br> per 100K people",
+       title = title_text,
+       subtitle = subtitle_text,
+       caption = "Source: US Centers for Disease Control and Prevention") +
+  theme_void() +
+  theme(legend.position = "none",
+        strip.text = element_markdown(
+          family = "text",
+          face = "bold"
+        ),
+    legend.title = element_text(
+      color = text_col,
+      hjust = 0.5,
+      family = "text",
+      face = "bold",
+      size = rel(1),
+    ),
+    legend.text = element_text(
+      color = text_col,
+      family = "text",
+      size = rel(1),
+      face = "bold"
+    ),
+    plot.title            = element_text(
+      size                = rel(1.1),
+      family              = "title",
+      face                = "bold",
+      color               = title_col,
+      lineheight          = 0.3,
+      margin              = margin(t = 5, b = 5),
+      hjust               = 0.5
+    ),        
+    plot.subtitle         = element_markdown(
+      size                = rel(0.9), 
+      family              = 'subtitle',
+      color               = subtitle_col,
+      hjust               = 0,
+      lineheight          = 0.2, 
+      margin              = margin(t = 5, b = 1)
+    ),
+      plot.caption          = element_markdown(
+      size                = rel(0.8), 
+      family              = 'caption',
+      color               = caption_col,
+      lineheight          = 0.3,
+      hjust               = 1,
+      halign              = 0,
+      margin              = margin(t = 10, b = 10)
+    ),
+    axis.title = element_markdown(
+      size = rel(0.7),
+      family = "caption",
+      face = "bold"
+    ),
+    axis.text  = element_markdown(
+      size = rel(0.7),
+      face = "bold",
+      family = "caption"
+    )
+  ) 
+  
+gr6
+```
+
