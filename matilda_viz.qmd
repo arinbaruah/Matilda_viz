@@ -620,7 +620,7 @@ title_text <- "Turning the Tide: Decreasing Cigarette Consumption and Deaths Amo
   
 subtitle_text <- "Smoking tobacco-based products remains the most widely abused addictive substance, particularly among  <br> individuals struggling with mental health issues. The harmful effects of smoking are well-documented, with <br> lung cancer  being a leading cause of death among heavy smokers. However, there is a positive trend emerging: <br> the average number of cigarettes sold per adult (aged 15 and above) has been steadily declining since 1974. <br> This decline is accompanied by a notable reduction in annual death rates among smokers. If this trend continues, <br> both the average number of cigarettes sold per adult and the related death rates are expected to reach record <br> lows in the coming years. This marks a significant step forward in the fight against substance abuse and <br> its detrimental health effects."
 
-
+lc_cigs_summarised_long <- lc_cigs_summarised %>% pivot_longer(cols = c(2:3),names_to = "metric",values_to = "value")
 cig_sales <- diff(range(lc_cigs_summarised_long$value[lc_cigs_summarised_long$metric == "cigs_sales_daily"]))
 avg_death <- diff(range(lc_cigs_summarised_long$value[lc_cigs_summarised_long$metric == "avg_death_rate"]))
 
@@ -783,11 +783,13 @@ cols <- c("Other Opioids" = "darkred",
 title_text <- "Rising Overdose Deaths: An Urgent Call for Action on Illicit Drug Abuse"
 subtitle_text <- "The recent surge in overdose deaths in the United States, particularly due to illicit drugs like opioids, <br> heroin, and cocaine, is deeply concerning. This trend suggests that more people are increasingly <br> turning to these substances, potentially driven by underlying issues such as mental health disorders, <br> which lead to addiction and, ultimately, fatal outcomes. In recent years, the <strong> annual death rate due to <br> overdoses has climbed to 20 per 100,000 people </strong> and continues to rise at an alarming pace. <br> This upward trajectory highlights an <span style='color: darkred;'>urgent need for targeted interventions to address the growing <br> number of drug users </span> and prevent further loss of life due to substance abuse."
 
-gr6 <- ggplot(data = df_overdose_long,aes(x = Year,y = death_rate)) + geom_line() +
+gr6 <- ggplot(data = df_overdose_long,aes(x = Year,y = death_rate)) + geom_line(aes(color = drug_type_clean),linewidth = 0.8,
+                                                                                arrow = arrow(type = "closed", 
+                                                                                              length = unit(0.1, "inches"))) +
   geom_area(alpha = 0.4,aes(fill = drug_type_clean)) + 
-  facet_wrap(~drug_type_clean,nrow = 1) + 
-  geom_point(data = df_overdose_long %>% filter(Year == 2020),aes(x = Year,y = death_rate),size = 3,color = "#21618C") +
+  facet_wrap(~drug_type_clean,nrow = 1)  +
   scale_fill_manual(values = cols) +
+  scale_color_manual(values = cols) +
     coord_cartesian(clip = 'off') +
   labs(x = "Year",y = "Annual death rate <br> per 100K people",
        title = title_text,
