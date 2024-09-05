@@ -634,12 +634,12 @@ future_years <- data.frame(Year = seq(2016, 2035))
 
 cigs_sales_future <- tibble(Year = seq(2016, 2035),
                             metric = "Cigarette sales per adult",
-                            value = predict(cig_sales_future_model, 
-                                                          newdata = future_years))
+                            value = predict(cig_sales_future_model,
+                                            newdata = future_years))
 avg_death_future <- tibble(Year = seq(2016, 2035),
                            metric = "Average death rate",
-                            value = predict(avg_death_future_model, 
-                                                          newdata = future_years))
+                            value = predict(avg_death_future_model,
+                                            newdata = future_years))
 
 lc_cigs_summarised_long <- rbind(lc_cigs_summarised_long,cigs_sales_future,avg_death_future)
 
@@ -773,20 +773,33 @@ df_overdose_long <- df_overdose_long %>% mutate(drug_type_clean = case_match(dru
 
 df_overdose_long$drug_type_clean <- factor(df_overdose_long$drug_type_clean,levels = c("Heroin","Prescription Opioids",
                                                                                        "Cocaine","Other Opioids","Synthetic Opioids")) 
+df_overdose_percent <- df_overdose_long %>% group_by(drug_type_clean) %>% 
+  mutate(per = round((death_rate - first(death_rate))/first(death_rate),0)) %>% arrange(-per) %>% filter(Year == 2020) 
 
 cols <- c("Other Opioids" = "darkred", 
           "Cocaine" = "#E59866",
-          "Prescription Opioids" = "#F9E79F",
+          "Prescription Opioids" = "#F4D03F",
           "Synthetic Opioids" = "darkred",
-          "Heroin" = "#ABEBC6")
+          "Heroin" = "#16A085")
 
 title_text <- "Rising Overdose Deaths: An Urgent Call for Action on Illicit Drug Abuse"
-subtitle_text <- "The recent surge in overdose deaths in the United States, particularly due to illicit drugs like opioids, <br> heroin, and cocaine, is deeply concerning. This trend suggests that more people are increasingly <br> turning to these substances, potentially driven by underlying issues such as mental health disorders, <br> which lead to addiction and, ultimately, fatal outcomes. In recent years, the <strong> annual death rate due to <br> overdoses has climbed to 20 per 100,000 people </strong> and continues to rise at an alarming pace. <br> This upward trajectory highlights an <span style='color: darkred;'>urgent need for targeted interventions to address the growing <br> number of drug users </span> and prevent further loss of life due to substance abuse."
+subtitle_text <- "The recent surge in overdose deaths in the United States, particularly due to illicit drugs like opioids, <br> heroin, and cocaine, is deeply concerning. This trend suggests that more people are increasingly <br> turning to these substances, potentially driven by underlying issues such as mental health disorders, <br> which lead to addiction and, ultimately, fatal outcomes. In recent years, the <strong> annual death rate due to <br> overdoses has climbed to 20 per 100,000 people </strong> and continues to rise at an alarming pace, <br> particularly for <span style='color: darkred;'>synthetic opioids whose death rates have risen by 58 times since the year 1999</span>. <br> <br> The upward trajectory highlights an <span style='color: darkred;'>urgent need for targeted interventions to address the growing <br> number of drug users </span> and prevent further loss of life due to substance abuse."
 
 gr6 <- ggplot(data = df_overdose_long,aes(x = Year,y = death_rate)) + geom_line(aes(color = drug_type_clean),linewidth = 0.8,
                                                                                 arrow = arrow(type = "closed", 
                                                                                               length = unit(0.1, "inches"))) +
   geom_area(alpha = 0.4,aes(fill = drug_type_clean)) + 
+  geom_richtext(
+         data = df_overdose_percent, aes(x = Year - 5, y = death_rate - 1, label = glue::glue("<strong> {per} times rise </strong>")),
+         hjust = 1,
+         vjust = -0.15,
+         fill = NA,
+         size = 3,
+         color = "darkred",
+         label.padding = unit(.125, "lines"),
+         label.r = unit(0, "lines"),
+         label.size = unit(0, "lines")
+     ) +
   facet_wrap(~drug_type_clean,nrow = 1)  +
   scale_fill_manual(values = cols) +
   scale_color_manual(values = cols) +
@@ -856,4 +869,10 @@ gr6 <- ggplot(data = df_overdose_long,aes(x = Year,y = death_rate)) + geom_line(
 gr6
 ggsave("images/overdose_deaths.jpeg",gr6,dpi = 300,height = 6, width = 10)
 ```
+
+```{r}
+
+```
+
+
 
