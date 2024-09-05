@@ -812,7 +812,8 @@ gr6 <- ggplot(data = df_overdose_long,aes(x = Year,y = death_rate)) + geom_line(
   theme(legend.position = "none",
         strip.text = element_markdown(
           family = "text",
-          face = "bold"
+          face = "bold",
+          size = rel(0.7)
         ),
     legend.title = element_text(
       color = text_col,
@@ -872,7 +873,121 @@ ggsave("images/overdose_deaths.jpeg",gr6,dpi = 300,height = 6, width = 10)
 
 ```{r}
 
+# work_interfere
+# care_options
+# mentalvsphysical
+
+df_survey_interfere <- df_survey %>% group_by(work_interfere) %>% drop_na() %>% summarise(Total = n()) %>%
+                       mutate(metric = "Work Interference") %>% rename("score" = "work_interfere")
+
+df_survey_care <- df_survey %>% group_by(care_options) %>% summarise(Total = n()) %>%
+   mutate(metric = "Care benefits") %>% rename("score" = "care_options")
+
+df_survey_mentvphy <- df_survey %>% group_by(mental_vs_physical)  %>% summarise(Total = n()) %>%
+  mutate(metric = "Importance") %>% 
+  rename("score" = "mental_vs_physical")
+
+df_survey_leave <- df_survey %>% group_by(leave) %>% summarise(Total = n()) %>% mutate(metric = "Leave benefits") %>%
+  rename("score" = "leave")
+
+df_survey_stats <- rbind(df_survey_interfere,df_survey_care,df_survey_mentvphy,df_survey_leave)
+
+df_survey_stats <- df_survey_stats %>% mutate(sentiment = case_match(score,
+                                                                     "Don't know" ~ "Neutral",
+                                                                     "Somewhat difficult" ~ "Negative",
+                                                                     "Very difficult" ~ "Negative",
+                                                                     "No" ~ "Negative",
+                                                                     "Not sure" ~ "Neutral",
+                                                                     "Sometimes" ~ "Neutral",
+                                                                     "Never" ~ "Positive",
+                                                                     "Rarely" ~ "Positive",
+                                                                     "Often" ~ "Negative",
+                                                                     .default = "Positive",
+                                                                     ))
+
+dim_order <- c("Positive","Neutral","Negative")
+df_survey_stats$sentiment <- factor(df_survey_stats$sentiment,levels = dim_order)
 ```
 
 
+
+```{r}
+
+custom_colors <- c("Negative" = "#CB4335",  
+                   "Neutral" = "#D4AC0D",  
+                   "Positive" = "#1E8449") 
+
+title_text <- "Mental Health in High-Stress Work Environments: <br> Are Employers Doing Enough?"
+subtitle_text <- "The World Health Organization’s data on deaths from mental health and substance <br> use disorders reveals that those aged 15-49 years are the most affected group.<br> With many in this age range being of prime working age, it raises concerns about the <br> impact of workplace environments on mental health. <br> <br> A 2016 global survey of tech industry employees across 48 countries explored this <br> issue, finding that about 75% of respondents believed, or were unsure, that mental <br> health problems interfered with their job performance. Despite this, over 50% felt <br> that their employers did not take sufficient steps to address mental health concerns. <br> <br> This trend highlights a significant issue: employees in high-stress industries like tech may develop severe mental health problems and turn to illicit substances as coping mechanisms. This underscores the urgent need for better mental health support in workplaces to prevent these outcomes."
+gr8 <- ggplot(data = df_survey_stats,aes(x = Total,y = metric,fill = sentiment)) + 
+  geom_col(position = "fill") + theme(legend.position = "top") +
+  scale_x_continuous(expand = c(0, 0), labels = scales::percent) +
+  scale_fill_manual(values = custom_colors,limits = c("Negative","Neutral","Positive")) +
+  labs(x = "Percentage of respondents",
+       y = "Survey metric",
+       fill = "Survey response on \n mental health at workplace",
+       title = title_text,
+       subtitle = subtitle_text,
+       caption = "Source: OSMI Tech Survey (2016)"
+       ) +
+  theme(legend.position = "top",
+        strip.text = element_markdown(
+          family = "text",
+          face = "bold",
+          size = rel(0.7)
+        ),
+    legend.title = element_text(
+      color = text_col,
+      hjust = 0.5,
+      family = "text",
+      face = "bold",
+      size = rel(0.6),
+    ),
+    legend.text = element_text(
+      color = text_col,
+      family = "text",
+      size = rel(0.4),
+      face = "bold"
+    ),
+    plot.title            = element_markdown(
+      size                = rel(1.1),
+      family              = "title",
+      face                = "bold",
+      color               = title_col,
+      lineheight          = 0.3,
+      margin              = margin(t = 5, b = 5),
+      hjust               = 0.5
+    ),        
+    plot.subtitle         = element_markdown(
+      size                = rel(0.9), 
+      family              = 'subtitle',
+      color               = subtitle_col,
+      hjust               = 0,
+      lineheight          = 0.2, 
+      margin              = margin(t = 5, b = 1)
+    ),
+      plot.caption          = element_markdown(
+      size                = rel(0.8), 
+      family              = 'caption',
+      color               = caption_col,
+      lineheight          = 0.3,
+      hjust               = 1,
+      halign              = 0,
+      margin              = margin(t = 10, b = 10)
+    ),
+    axis.title = element_markdown(
+      size = rel(0.7),
+      family = "caption",
+      face = "bold"
+    ),
+    axis.text  = element_markdown(
+      size = rel(0.5),
+      face = "bold",
+      family = "caption"
+    )
+  ) 
+  
+gr8
+ggsave("images/mental_health_survey.jpeg",gr8,dpi = 300,height = 6, width = 10)
+```
 
