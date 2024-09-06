@@ -102,7 +102,8 @@ df_drug_gender <- inner_join(df_drug_gender,df_pop,by = c("Entity"="Country Name
 ```
 
 ```{r}
-df_drug_gender %>% mutate(prop_male = 100*`Total deaths from drug use disorders among females` / `2021`) %>% filter(`Total deaths from drug use disorders among males` > 1000)
+df_drug_gender %>% mutate(prop_male = 100*`Total deaths from drug use disorders among females` / `2021`) %>% 
+  filter(`Total deaths from drug use disorders among males` > 1000)
 ```
 # Share of deaths across genders
 
@@ -112,28 +113,49 @@ continents <- c("North America","South America","Asia","Oceania","Africa","World
 
 imp_countries <- c("India","China","United States","Australia","Canada","Germany","United Kingdom")
 
+
 options(scipen = 1000)
 
-df_drug_gender <- df_drug_gender %>% filter()
+note_text <- "Equal male and female deaths"
+
 gr1 <- ggplot(data = df_drug_gender %>% filter(!Entity %in% continents),
               aes(y = `Total deaths from drug use disorders among males`, 
 x = `Total deaths from drug use disorders among females`)) + geom_point(color = "lightgray") +
   geom_point(data = df_drug_gender %>% filter(!Entity %in% continents & Entity %in% imp_countries),
-             color = "steelblue",size = 3) +
+             color = "steelblue",size = 4) +
+  geom_point(data = df_drug_gender %>% filter(Entity == "Ghana"),
+             color = "#FA8072",size = 4) +
   geom_abline(intercept = 0,slope = 1,linetype = "dashed",alpha = 0.3) + 
-  geom_text_repel(data = df_drug_gender %>% filter(Entity %in% imp_countries),
+  geom_text_repel(data = df_drug_gender %>% filter(Entity %in% imp_countries | Entity == "Ghana"),
                   aes(label = Entity,
                       hjust = -0.8,
-                      vjust = 1.8),
-                  size = 2.5,fontface = "bold") +
-  scale_x_continuous(transform = "log10", labels = scales::comma) +
-  scale_y_continuous(transform = "log10", labels = scales::comma) +
-  labs(x =     "Female deaths (log)",
-       y =     "Male deaths (log)",
+                      vjust = 2),
+                  size = rel(8),
+                  fontface = "bold") +
+     geom_richtext(
+     aes(
+      x = 10, y = 10,
+      label = note_text,
+      family = "text"
+    ),
+    vjust = 1.1,
+    label.color = NA,
+    size = rel(9),
+    fill = bkg_col
+  ) + 
+    geom_curve(
+    aes(x = 75, xend = 96, y = 50, yend = 12),
+    curvature = 0.2,
+    arrow = arrow(length = unit(0.15, "cm"), type = "closed"),
+    color = "black"
+  ) +
+  scale_x_continuous(transform = "log10",labels = scales::comma) +
+  scale_y_continuous(transform = "log10",labels = scales::comma) +
+  labs(x =     "Female deaths",
+       y =     "Male deaths",
        title = "Drug Use Disorders and Mortality: Understanding the Gender Gap",
-       subtitle = "The data across various countries has revealed a concerning trend: the number of deaths resulting from drug use disorders <br> is significantly high in the <span style='color: darkred;'> United States </span>, with approximately <strong> 100,000 deaths recorded in 2021 alone </strong>. Furthermore, the data <br> suggests that in most countries, 
-       males are disproportionately affected by drug use disorders, with <strong> death rates among males <br> consistently exceeding those among females </strong>. This highlights that males are at a far greater risk of succumbing to the <br> harmful effects of illicit drugs.",
-       caption = "Source: IHME, Global Burden of Disease, 2021") +
+       subtitle = "The data across various countries has revealed a concerning trend: the number of deaths resulting from <span style='color: darkred;'>  drug use disorders is significantly high in the United States </span>, <br> with approximately <strong> 100,000 deaths recorded in 2021 alone </strong>. Furthermore, the data suggests that in most countries with the exception of Ghana, males are  <br> disproportionately affected by drug use disorders, with <strong> death rates among males consistently exceeding those among females </strong>. This highlights that males are at <br> a far greater risk of succumbing to the harmful effects of illicit drugs.",
+       caption = "#Rstudio #ggplot2 | Source: IHME, Global Burden of Disease, 2021") +
   theme(legend.position = "top",
     legend.title.position = "top",
     legend.title = element_text(
@@ -150,7 +172,7 @@ x = `Total deaths from drug use disorders among females`)) + geom_point(color = 
       face = "bold"
     ),
     plot.title            = element_text(
-      size                = rel(1),
+      size                = rel(4),
       family              = "title",
       face                = "bold",
       color               = title_col,
@@ -159,27 +181,27 @@ x = `Total deaths from drug use disorders among females`)) + geom_point(color = 
       hjust               = 0.5
     ),        
     plot.subtitle         = element_markdown(
-      size                = rel(0.6), 
+      size                = rel(2), 
       family              = 'subtitle',
       color               = subtitle_col,
       hjust               = 0,
-      lineheight          = 0.2, 
+      lineheight          = 0.4, 
       margin              = margin(t = 5, b = 1)
     ),
       plot.caption          = element_markdown(
-      size                = rel(0.5), 
+      size                = rel(1), 
       family              = 'caption',
       color               = caption_col,
       lineheight          = 0.3,
-      hjust               = 1,
+      hjust               = 0.5,
       halign              = 0,
       margin              = margin(t = 10, b = 10)
     ),
     axis.title = element_markdown(
-      size = rel(0.6)
+      size = rel(3)
     ),
     axis.text  = element_markdown(
-      size = rel(0.6)
+      size = rel(1.5)
     )
   ) 
 
@@ -188,7 +210,7 @@ gr1
 ggsave("images/Gender_death_rate.jpeg",gr1,dpi = 300,height = 6, width = 10)
 ```
 ```{r}
-df_drug_gender %>% filter(Entity != continents) %>% arrange(-`Total deaths from drug use disorders among males`)
+df_drug_gender %>% filter(Entity != continents) %>% mutate(ratio = `Total deaths from drug use disorders among females`/`Total deaths from drug use disorders among males`) %>% arrange(-ratio)
 ```
 
 
