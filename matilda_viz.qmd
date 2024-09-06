@@ -154,7 +154,7 @@ x = `Total deaths from drug use disorders among females`)) + geom_point(color = 
   labs(x =     "Female deaths",
        y =     "Male deaths",
        title = "Drug Use Disorders and Mortality: Understanding the Gender Gap",
-       subtitle = "The data across various countries has revealed a concerning trend: the number of deaths resulting from <span style='color: darkred;'>  drug use disorders is significantly high in the United States </span>, <br> with approximately <strong> 100,000 deaths recorded in 2021 alone </strong>. Furthermore, the data suggests that in most countries with the exception of Ghana, males are  <br> disproportionately affected by drug use disorders, with <strong> death rates among males consistently exceeding those among females </strong>. This highlights that males are at <br> a far greater risk of succumbing to the harmful effects of illicit drugs.",
+       subtitle = "The data across various countries has revealed a concerning trend: the number of deaths resulting from <span style='color: darkred;'>  drug use disorders is significantly high <br> in the United States </span>, with approximately <strong> 100,000 deaths recorded in 2021 alone </strong>. Furthermore, the data suggests that in most countries with <br> the exception of Ghana, males are disproportionately affected by drug use disorders, with <strong> death rates among males consistently exceeding <br> those among females </strong>. This highlights that males are at a far greater risk of succumbing to the harmful effects of illicit drugs.",
        caption = "#Rstudio #ggplot2 | Source: IHME, Global Burden of Disease, 2021") +
   theme(legend.position = "top",
     legend.title.position = "top",
@@ -172,7 +172,7 @@ x = `Total deaths from drug use disorders among females`)) + geom_point(color = 
       face = "bold"
     ),
     plot.title            = element_text(
-      size                = 50,
+      size                = 70,
       family              = "title",
       face                = "bold",
       color               = title_col,
@@ -181,7 +181,7 @@ x = `Total deaths from drug use disorders among females`)) + geom_point(color = 
       hjust               = 0.5
     ),        
     plot.subtitle         = element_markdown(
-      size                = 30, 
+      size                = 35, 
       family              = 'subtitle',
       color               = subtitle_col,
       hjust               = 0,
@@ -206,8 +206,6 @@ x = `Total deaths from drug use disorders among females`)) + geom_point(color = 
     )
   ) 
 
-
-gr1
 ggsave("images/Gender_death_rate.jpeg",gr1,dpi = 300,height = 6, width = 10)
 ```
 ```{r}
@@ -259,7 +257,7 @@ gr2 <- ggplot(data = df_substance_deaths %>% filter(Entity %in% tags) , aes(x = 
   label = 'COVID-19', size = unit(8, "pt")
 ) + labs(x = "Year",
          y = "Deaths due to mental health and drug use disorder",
-         title = "Global Trends in Deaths from Mental Health and Substance Use Disorders (2000-2022)",
+         title = "Global Trends in Deaths from <br> Mental Health and Substance Use Disorders (2000-2022)",
          subtitle = "The number of deaths due to mental health and substance use disorders per 100,000 individuals over the years reveals a troubling trend <br> for two specific countries:<span style='color: darkred;'> the United States and Canada </span>. While the death rates have remained relatively stable across other continents, <br> North America presents a stark contrast. Both countries have experienced a significant increase in deaths, particularly in recent years. <strong> <br> This rise has been notably steep following the COVID-19 pandemic </strong>,which may have exacerbated mental health issues due to extended <br> periods of isolation and other pandemic-related stressors. ",
          caption = "#Rstudio #ggplot2 | Source: World Health Organisation") +
 
@@ -279,8 +277,8 @@ gr2 <- ggplot(data = df_substance_deaths %>% filter(Entity %in% tags) , aes(x = 
       size = rel(1),
       face = "bold"
     ),
-  plot.title            = element_text(
-      size                = 50,
+  plot.title            = element_markdown(
+      size                = 70,
       family              = "title",
       face                = "bold",
       color               = title_col,
@@ -362,9 +360,9 @@ df_substance_deaths_age_long_grouped$Total_deaths_label <- paste0(
 
 ```{r}
 #| warning: false
-title_text <- "Persistent Trends in Deaths from Mental Health and Substance Use Disorders <br> Among Middle-Aged Groups"
+title_text <- "Persistent Trends in Deaths from Mental Health and Substance Use Disorders <br> among Middle-Aged Groups"
 
-subtitle_text <- "A closer examination of deaths due to mental health and substance use disorders reveals that <strong> middle-aged individuals, particularly <br> those between 15-49 years, have consistently  experienced the highest mortality rates.</strong> In recent years, the death toll in this age <br> group has reached up to <span style='color: darkred;'>half a million annually </span>, closely followed by those aged 50-69 years. A significant portion of these deaths <br> occur among the working-age population, suggesting that <strong> professional pressures and stress could be major contributing factors to <br> the decline in mental health, particularly for individuals aged 15-49. </strong>"
+subtitle_text <- "A closer examination of deaths due to mental health and substance use disorders reveals that <strong> middle-aged individuals, particularly <br> those between 15-49 years, have consistently  experienced the highest mortality rates.</strong> In recent years, the death toll in this age <br> group has reached up to <span style='color: darkred;'>half a million annually </span>, closely followed by those aged 50-69 years. A significant portion of these deaths <br> occur among the working-age population, suggesting that <strong> professional pressures and stress could be major contributing factors <br>  to the decline in mental health, particularly for individuals aged 15-49. </strong>"
 
 
 gr3 <- ggplot(df_substance_deaths_age_long_grouped, aes(id = age_group_clean,area = Total_deaths,fill = Total_deaths)) +
@@ -400,7 +398,7 @@ gr3 <- ggplot(df_substance_deaths_age_long_grouped, aes(id = age_group_clean,are
       face = "bold"
     ),
   plot.title            = element_markdown(
-      size                = 50,
+      size                = 60,
       family              = "title",
       face                = "bold",
       color               = title_col,
@@ -434,7 +432,7 @@ ggsave("images/Global_death_rate_age.jpeg",gr3,dpi = 300,height = 6, width = 10)
 ```{r}
 df_drug_dependency <- df_drug_dependency %>% clean_names()
 
-title_text <- "Elevated Risk of Substance Dependence Among Professionals in <br> High-Stress Work Environments"
+title_text <- "Elevated Risk of Substance Dependence Among <br> Professionals in High-Stress Work Environments"
 subtitle_text <- "A high-pressure work environment can significantly impact the mental well-being of professionals, often making <br> them vulnerable to mental health disorders. Statistics show a strong correlation between developing a mental <br> health condition and subsequent substance dependence. Among working professionals, the most common mental <br> health disorders include <strong> ADHD, Social Phobia, Major Depression, and Generalized Anxiety Disorder </strong>. The values <br> presented indicate the likelihood of individuals who develop one of these conditions also turning to substance use <br> as a coping mechanism. <span style='color: darkred;'>A person with a diagnosed ADHD condition is 5.2 times likely to fall victim to substance use.</span> "
 
 work_conditions <- c("Generalized anxiety disorder (GAD)","Major depression",
@@ -445,7 +443,7 @@ gr4 <- ggplot(data = df_drug_dependency,aes(x = increased_risk_of_illicit_drug_d
   geom_col(fill = "lightgray") + 
   geom_col(data = df_drug_dependency %>% filter(entity %in% work_conditions) ,fill = "#CD5C5C") +
   geom_text(aes(label = increased_risk_of_illicit_drug_dependency,
-                hjust = 2,fontface = "bold",size = 20),color = "black") +
+                hjust = 2,fontface = "bold",size = 25),color = "white") +
   labs(x = "Risk of substance dependency",
        y = "",
        title = title_text,
@@ -467,7 +465,7 @@ gr4 <- ggplot(data = df_drug_dependency,aes(x = increased_risk_of_illicit_drug_d
       face = "bold"
     ),
     plot.title            = element_markdown(
-      size                = 50,
+      size                = 70,
       family              = "title",
       face                = "bold",
       color               = title_col,
