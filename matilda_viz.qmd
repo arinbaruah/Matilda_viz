@@ -172,7 +172,7 @@ x = `Total deaths from drug use disorders among females`)) + geom_point(color = 
       face = "bold"
     ),
     plot.title            = element_text(
-      size                = rel(4),
+      size                = 50,
       family              = "title",
       face                = "bold",
       color               = title_col,
@@ -181,7 +181,7 @@ x = `Total deaths from drug use disorders among females`)) + geom_point(color = 
       hjust               = 0.5
     ),        
     plot.subtitle         = element_markdown(
-      size                = rel(2), 
+      size                = 30, 
       family              = 'subtitle',
       color               = subtitle_col,
       hjust               = 0,
@@ -260,7 +260,7 @@ gr2 <- ggplot(data = df_substance_deaths %>% filter(Entity %in% tags) , aes(x = 
 ) + labs(x = "Year",
          y = "Deaths due to mental health and drug use disorder",
          title = "Global Trends in Deaths from Mental Health and Substance Use Disorders (2000-2022)",
-         subtitle = "The number of deaths due to mental health and substance use disorders per 100,000 individuals over the years reveals a troubling trend for two specific countries:<span style='color: darkred;'> the United States and Canada </span>. While the death rates <br> have remained relatively stable across other continents, North America presents a stark contrast. Both countries have experienced a significant increase in deaths, particularly in recent years. <strong> This rise has been notably <br> steep following the COVID-19 pandemic </strong>,which may have exacerbated mental health issues due to extended periods of isolation and other pandemic-related stressors. ",
+         subtitle = "The number of deaths due to mental health and substance use disorders per 100,000 individuals over the years reveals a troubling trend <br> for two specific countries:<span style='color: darkred;'> the United States and Canada </span>. While the death rates have remained relatively stable across other continents, <br> North America presents a stark contrast. Both countries have experienced a significant increase in deaths, particularly in recent years. <strong> <br> This rise has been notably steep following the COVID-19 pandemic </strong>,which may have exacerbated mental health issues due to extended <br> periods of isolation and other pandemic-related stressors. ",
          caption = "#Rstudio #ggplot2 | Source: World Health Organisation") +
 
     scale_color_manual(values = my_col |> darken(.25)) +
@@ -280,7 +280,7 @@ gr2 <- ggplot(data = df_substance_deaths %>% filter(Entity %in% tags) , aes(x = 
       face = "bold"
     ),
   plot.title            = element_text(
-      size                = rel(4),
+      size                = 50,
       family              = "title",
       face                = "bold",
       color               = title_col,
@@ -289,7 +289,7 @@ gr2 <- ggplot(data = df_substance_deaths %>% filter(Entity %in% tags) , aes(x = 
       hjust               = 0.5
     ),        
     plot.subtitle         = element_markdown(
-      size                = rel(2), 
+      size                = 35, 
       family              = 'subtitle',
       color               = subtitle_col,
       hjust               = 0,
@@ -364,7 +364,7 @@ df_substance_deaths_age_long_grouped$Total_deaths_label <- paste0(
 #| warning: false
 title_text <- "Persistent Trends in Deaths from Mental Health and Substance Use Disorders <br> Among Middle-Aged Groups"
 
-subtitle_text <- "A closer examination of deaths due to mental health and substance use disorders reveals that <strong> middle-aged individuals, particularly those between 15-49 years, have consistently  experienced the highest mortality rates.</strong> In recent <br> years, the death toll in this age group has reached up to half a million annually, closely followed by those aged 50-69 years. A significant portion of these deaths occur among the working-age population, suggesting that professional <br> pressures and stress could be major contributing factors to the decline in mental health, particularly for individuals aged 15-49."
+subtitle_text <- "A closer examination of deaths due to mental health and substance use disorders reveals that <strong> middle-aged individuals, particularly <br> those between 15-49 years, have consistently  experienced the highest mortality rates.</strong> In recent years, the death toll in this age <br> group has reached up to <span style='color: darkred;'>half a million annually </span>, closely followed by those aged 50-69 years. A significant portion of these deaths <br> occur among the working-age population, suggesting that <strong> professional pressures and stress could be major contributing factors to <br> the decline in mental health, particularly for individuals aged 15-49. </strong>"
 
 
 gr3 <- ggplot(df_substance_deaths_age_long_grouped, aes(id = age_group_clean,area = Total_deaths,fill = Total_deaths)) +
@@ -373,17 +373,18 @@ gr3 <- ggplot(df_substance_deaths_age_long_grouped, aes(id = age_group_clean,are
                               label = Total_deaths_label),
                            family = "text",color = "white", 
                            fontface = "bold", lineheight = 0.3,size = 14) +
-  geom_circlepack_text(aes(label = age_group_clean),color = "#f1fffe",size = 5,
+  geom_circlepack_text(aes(label = age_group_clean),color = "#f1fffe",size = 8,
                        check_overlap = TRUE,family = "caption", lineheight = 0.9) +
   facet_wrap(~year) +
   scale_color_identity() +
   theme_void() +
    labs(title = title_text,
         subtitle = subtitle_text,
-        caption = "Source: World Health Organisation (2024)") +
+        caption = "#Rstudio #ggcirclepack #ggplot2 | Source: World Health Organisation (2024)"
+        ) +
    theme(legend.position = "none",
          strip.text = element_markdown(family = "text",
-                                       size = rel(2)),
+                                       size = rel(3)),
     legend.title.position = "none",
     legend.title = element_text(
       color = text_col,
@@ -399,7 +400,7 @@ gr3 <- ggplot(df_substance_deaths_age_long_grouped, aes(id = age_group_clean,are
       face = "bold"
     ),
   plot.title            = element_markdown(
-      size                = rel(4),
+      size                = 50,
       family              = "title",
       face                = "bold",
       color               = title_col,
@@ -408,12 +409,12 @@ gr3 <- ggplot(df_substance_deaths_age_long_grouped, aes(id = age_group_clean,are
       hjust               = 0.5
     ),        
     plot.subtitle         = element_markdown(
-      size                = rel(2), 
+      size                = 35, 
       family              = 'subtitle',
       color               = subtitle_col,
-      hjust               = 0.2,
+      hjust               = 0,
       lineheight          = 0.4, 
-      margin              = margin(t = 5, b = 1)
+      margin              = margin(t = 15, b = 1)
     ),
       plot.caption          = element_markdown(
       size                = rel(2), 
@@ -421,7 +422,7 @@ gr3 <- ggplot(df_substance_deaths_age_long_grouped, aes(id = age_group_clean,are
       color               = caption_col,
       lineheight          = 0.3,
       hjust               = 0.5,
-      halign              = 0,
+      halign              = 1,
       margin              = margin(t = 10, b = 10)
     )
   ) + scale_fill_continuous_tableau(palette = "Classic Red") + coord_equal()
@@ -433,8 +434,8 @@ ggsave("images/Global_death_rate_age.jpeg",gr3,dpi = 300,height = 6, width = 10)
 ```{r}
 df_drug_dependency <- df_drug_dependency %>% clean_names()
 
-title_text <- "Elevated Risk of Substance Dependence Among Professionals in High-Stress Work Environments"
-subtitle_text <- "A high-pressure work environment can significantly impact the mental well-being <br> of professionals, often making them vulnerable to mental health disorders. <br> Statistics show a strong correlation between developing a mental health <br> condition and subsequent substance dependence. Among working professionals, <br> the most common mental health disorders include <strong> ADHD, Social Phobia, Major Depression, <br> and Generalized Anxiety Disorder </strong>. The values presented indicate the likelihood <br> of individuals who develop one of these conditions also turning to substance use as a coping mechanism. A person with a diagnosed ADHD condition is <span style='color: darkred;'>5.2 times likely </span> to fall victim to substance use."
+title_text <- "Elevated Risk of Substance Dependence Among Professionals in <br> High-Stress Work Environments"
+subtitle_text <- "A high-pressure work environment can significantly impact the mental well-being of professionals, often making <br> them vulnerable to mental health disorders. Statistics show a strong correlation between developing a mental <br> health condition and subsequent substance dependence. Among working professionals, the most common mental <br> health disorders include <strong> ADHD, Social Phobia, Major Depression, and Generalized Anxiety Disorder </strong>. The values <br> presented indicate the likelihood of individuals who develop one of these conditions also turning to substance use <br> as a coping mechanism. <span style='color: darkred;'>A person with a diagnosed ADHD condition is 5.2 times likely to fall victim to substance use.</span> "
 
 work_conditions <- c("Generalized anxiety disorder (GAD)","Major depression",
                      "Social phobia","Any Anxiety Disorder","Attention deficit hyperactivity (ADHD)")
@@ -443,9 +444,10 @@ gr4 <- ggplot(data = df_drug_dependency,aes(x = increased_risk_of_illicit_drug_d
                                      y = reorder(entity,increased_risk_of_illicit_drug_dependency))) + 
   geom_col(fill = "lightgray") + 
   geom_col(data = df_drug_dependency %>% filter(entity %in% work_conditions) ,fill = "#CD5C5C") +
-  geom_text(aes(label = increased_risk_of_illicit_drug_dependency,hjust = 1,fontface = "bold"),color = "white") +
+  geom_text(aes(label = increased_risk_of_illicit_drug_dependency,
+                hjust = 2,fontface = "bold",size = 20),color = "black") +
   labs(x = "Risk of substance dependency",
-       y = "Diagnosed conditions",
+       y = "",
        title = title_text,
        subtitle = subtitle_text,
        caption = "Source: Swendsen et al. (2010)") +
@@ -464,8 +466,8 @@ gr4 <- ggplot(data = df_drug_dependency,aes(x = increased_risk_of_illicit_drug_d
       size = rel(1),
       face = "bold"
     ),
-    plot.title            = element_text(
-      size                = rel(1.1),
+    plot.title            = element_markdown(
+      size                = 50,
       family              = "title",
       face                = "bold",
       color               = title_col,
@@ -474,7 +476,7 @@ gr4 <- ggplot(data = df_drug_dependency,aes(x = increased_risk_of_illicit_drug_d
       hjust               = 0.5
     ),        
     plot.subtitle         = element_markdown(
-      size                = rel(0.9), 
+      size                = 35, 
       family              = 'subtitle',
       color               = subtitle_col,
       hjust               = 0,
@@ -491,12 +493,12 @@ gr4 <- ggplot(data = df_drug_dependency,aes(x = increased_risk_of_illicit_drug_d
       margin              = margin(t = 10, b = 10)
     ),
     axis.title = element_markdown(
-      size = rel(0.7),
+      size = 25,
       family = "caption",
       face = "bold"
     ),
     axis.text  = element_markdown(
-      size = rel(0.7),
+      size = 20,
       face = "bold",
       family = "caption"
     )
