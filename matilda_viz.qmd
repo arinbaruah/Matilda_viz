@@ -49,7 +49,7 @@ mn <- str_glue("<span style='font-family:fa6-brands'>&#xf4f6;</span>")
 
 
 # plot colors
-bkg_col      <- colorspace::lighten("#fbfbf8", 0.05)    
+bkg_col      <- "#FEF9E7" #colorspace::lighten("#FEF9E7", 0.05)    
 title_col    <- "#3d3d3d"           
 subtitle_col <- "#3d3d3d"     
 caption_col  <- "#72647D"   
@@ -208,6 +208,8 @@ x = `Total deaths from drug use disorders among females`)) + geom_point(color = 
 
 ggsave("images/Gender_death_rate.jpeg",gr1,dpi = 300,height = 6, width = 10)
 ```
+
+
 ```{r}
 df_drug_gender %>% filter(Entity != continents) %>% mutate(ratio = `Total deaths from drug use disorders among females`/`Total deaths from drug use disorders among males`) %>% arrange(-ratio)
 ```
@@ -248,7 +250,7 @@ gr2 <- ggplot(data = df_substance_deaths %>% filter(Entity %in% tags) , aes(x = 
         linewidth = .5, se = FALSE, lineend = "round",
         fontface = "bold",
         size = rel(6)
-    ) +     theme_minimal()  +
+    ) +    # theme_minimal()  +
   annotate(
   "text",
   x = 2021,
@@ -277,6 +279,7 @@ gr2 <- ggplot(data = df_substance_deaths %>% filter(Entity %in% tags) , aes(x = 
       size = rel(1),
       face = "bold"
     ),
+    plot.background = element_rect(colour = bkg_col),
   plot.title            = element_markdown(
       size                = 70,
       family              = "title",
@@ -304,7 +307,7 @@ gr2 <- ggplot(data = df_substance_deaths %>% filter(Entity %in% tags) , aes(x = 
       margin              = margin(t = 10, b = 10)
     ),
     axis.title = element_markdown(
-      size = rel(3),
+      size = rel(2),
       family = "text",
       face = "bold"
     ),
@@ -362,20 +365,19 @@ df_substance_deaths_age_long_grouped$Total_deaths_label <- paste0(
 #| warning: false
 title_text <- "Persistent Trends in Deaths from Mental Health and Substance Use Disorders <br> among Middle-Aged Groups"
 
-subtitle_text <- "A closer examination of deaths due to mental health and substance use disorders reveals that <strong> middle-aged individuals, particularly <br> those between 15-49 years, have consistently  experienced the highest mortality rates.</strong> In recent years, the death toll in this age <br> group has reached up to <span style='color: darkred;'>half a million annually </span>, closely followed by those aged 50-69 years. A significant portion of these deaths <br> occur among the working-age population, suggesting that <strong> professional pressures and stress could be major contributing factors <br>  to the decline in mental health, particularly for individuals aged 15-49. </strong>"
+subtitle_text <- "A closer examination of deaths due to mental health and substance use disorders reveals that <strong> middle-aged individuals, <br> particularly  those between 15-49 years, have consistently  experienced the highest mortality rates.</strong> In recent years, the <br> death toll in this age group has reached up to <span style='color: darkred;'>half a million annually </span>, closely followed by those aged 50-69 years. A <br> significant portion of these deaths occur among the working-age population, suggesting that <strong> professional pressures <br> and stress could be major contributing factors to the decline in mental health, particularly for individuals aged 15-49. </strong>"
 
 
 gr3 <- ggplot(df_substance_deaths_age_long_grouped, aes(id = age_group_clean,area = Total_deaths,fill = Total_deaths)) +
   geom_circlepack() +
-    geom_circlepack_text( aes(y = after_stat(y + 0.1),
+    geom_circlepack_text( aes(y = after_stat(y + 0.08),
                               label = Total_deaths_label),
                            family = "text",color = "white", 
-                           fontface = "bold", lineheight = 0.3,size = 14) +
+                           fontface = "bold", lineheight = 0.3,size = 12) +
   geom_circlepack_text(aes(label = age_group_clean),color = "#f1fffe",size = 8,
-                       check_overlap = TRUE,family = "caption", lineheight = 0.9) +
+                       check_overlap = TRUE,family = "caption", lineheight = 0.9) + #theme_void() +
   facet_wrap(~year) +
   scale_color_identity() +
-  theme_void() +
    labs(title = title_text,
         subtitle = subtitle_text,
         caption = "#Rstudio #ggcirclepack #ggplot2 | Source: World Health Organisation (2024)"
@@ -422,8 +424,13 @@ gr3 <- ggplot(df_substance_deaths_age_long_grouped, aes(id = age_group_clean,are
       hjust               = 0.5,
       halign              = 1,
       margin              = margin(t = 10, b = 10)
-    )
+    ),
+  axis.text = element_blank(),
+  axis.title.y = element_blank(),
+  panel.grid.major = element_blank(),  # Remove major grid lines
+  panel.grid.minor = element_blank()   # Remove minor grid lines
   ) + scale_fill_continuous_tableau(palette = "Classic Red") + coord_equal()
+  
 
 gr3
 ggsave("images/Global_death_rate_age.jpeg",gr3,dpi = 300,height = 6, width = 10)
@@ -433,7 +440,7 @@ ggsave("images/Global_death_rate_age.jpeg",gr3,dpi = 300,height = 6, width = 10)
 df_drug_dependency <- df_drug_dependency %>% clean_names()
 
 title_text <- "Elevated Risk of Substance Dependence Among <br> Professionals in High-Stress Work Environments"
-subtitle_text <- "A high-pressure work environment can significantly impact the mental well-being of professionals, often making <br> them vulnerable to mental health disorders. Statistics show a strong correlation between developing a mental <br> health condition and subsequent substance dependence. Among working professionals, the most common mental <br> health disorders include <strong> ADHD, Social Phobia, Major Depression, and Generalized Anxiety Disorder </strong>. The values <br> presented indicate the likelihood of individuals who develop one of these conditions also turning to substance use <br> as a coping mechanism. <span style='color: darkred;'>A person with a diagnosed ADHD condition is 5.2 times likely to fall victim to substance use.</span> "
+subtitle_text <- "A high-pressure work environment can significantly impact the mental well-being of professionals, often making them vulnerable to mental <br> health disorders. Statistics show a strong correlation between developing a mental health condition and subsequent substance dependence. <br> Among working professionals, the most common mental health disorders include <strong> ADHD, Social Phobia, Major Depression, and Generalized <br> Anxiety Disorder </strong>. The values presented indicate the likelihood of individuals who develop one of these conditions also turning to substance <br> use as a coping mechanism. <span style='color: darkred;'>A person with a diagnosed ADHD condition is 5.2 times likely to fall victim to substance use.</span> "
 
 work_conditions <- c("Generalized anxiety disorder (GAD)","Major depression",
                      "Social phobia","Any Anxiety Disorder","Attention deficit hyperactivity (ADHD)")
@@ -443,13 +450,12 @@ gr4 <- ggplot(data = df_drug_dependency,aes(x = increased_risk_of_illicit_drug_d
   geom_col(fill = "lightgray") + 
   geom_col(data = df_drug_dependency %>% filter(entity %in% work_conditions) ,fill = "#CD5C5C") +
   geom_text(aes(label = increased_risk_of_illicit_drug_dependency,
-                hjust = 2,fontface = "bold",size = 25),color = "white") +
+                hjust = 1,fontface = "bold"),color = "white",,size = 16) +
   labs(x = "Risk of substance dependency",
        y = "",
        title = title_text,
        subtitle = subtitle_text,
        caption = "#Rstudio #ggplot2 | Source: Swendsen et al. (2010)") +
-  theme_minimal() +
   theme(legend.position = "none",
     legend.title = element_text(
       color = text_col,
@@ -499,7 +505,9 @@ gr4 <- ggplot(data = df_drug_dependency,aes(x = increased_risk_of_illicit_drug_d
       size = 20,
       face = "bold",
       family = "caption"
-    )
+    ),
+   panel.grid.major = element_blank(),
+   panel.grid.minor = element_blank(),
   ) 
 
 ggsave("images/drug_dependency.jpeg",gr4,dpi = 300,height = 6, width = 10)
@@ -512,7 +520,7 @@ library(treemapify)
 
 title_text <- "Tobacco’s Toll: Addressing the Leading Cause of Global Substance-Related Deaths"
 
-subtitle_text <- "In 2021, the global annual number of deaths caused by substance use highlighted <strong> tobacco as the leading cause </strong>, with a staggering <span style='color: darkred;'> 7.2 million <br> deaths </span>. <strong>Alcohol</strong> followed as the second highest at <span style='color: darkred;'>2 million deaths</span>, and <strong>illicit drugs</strong> accounted for <span style='color: darkred;'>0.6 million deaths</span>. The overwhelming number <br> of deaths from tobacco, primarily due to smoking,suggests that a significant portion of the global population remains dependent on it. Smoking <br> is often the first substance people become addicted to, often triggered by mental health challenges such as stress. The fact that <span style='color: darkred;'><strong> tobacco- <br> related deaths are more than three times higher than the next leading cause of substance-related deaths </span></strong> underscores the urgent need for <br> focused efforts to limit easy access to tobacco products, such as cigarettes, and to promote cessation programs and awareness campaigns <br> to combat tobacco addiction."
+subtitle_text <- "In 2021, the global annual number of deaths caused by substance use highlighted <strong> tobacco as the leading cause </strong>, with a staggering <span style='color: darkred;'> 7.2 million <br> deaths </span>. <strong>Alcohol</strong> followed as the second highest at <span style='color: darkred;'>2 million deaths</span>, and <strong>illicit drugs</strong> accounted for <span style='color: darkred;'>0.6 million deaths</span>. The overwhelming <br> number of deaths from tobacco, primarily due to smoking,suggests that a significant portion of the global population remains dependent on it. <br> Smoking is often the first substance people become addicted to, often triggered by mental health challenges such as stress. The fact that <br> <span style='color: darkred;'><strong> tobacco- related deaths are more than three times higher than the next leading cause of substance-related deaths </span></strong> underscores the <br> urgent need for focused efforts to limit easy access to tobacco products, such as cigarettes, and to promote cessation programs and <br> awareness campaigns to combat tobacco addiction."
 
 gr7 <- ggplot(df_drug_deaths, aes(area = deaths, fill = deaths,
                label = paste0(round(deaths/10^6,1)," mil deaths","\n",drug),
@@ -531,7 +539,6 @@ gr7 <- ggplot(df_drug_deaths, aes(area = deaths, fill = deaths,
   labs(title = title_text,
        subtitle = subtitle_text,
        caption = "#Rstudio #ggtreemap #ggplot2 | Source: IHME Global Burden of Disease (2021)") +
-   theme_minimal() +
   theme(legend.position = "none",
     legend.title = element_text(
       color = text_col,
@@ -735,27 +742,26 @@ gr5 <- ggplot(lc_cigs_summarised_long, aes(x = Year)) +
   
   scale_color_manual(values = c(`Average death rate` = "darkred",`Cigarette sales per adult` = "orange")) +
   scale_y_continuous(
-    name = "Average daily cigarette sales per adult", 
-    sec.axis = sec_axis(~ . / scale_factor, name = "Average death rate (%)")) + 
+    name = "Average daily cigarette sales <br> per adult", 
+    sec.axis = sec_axis(~ . / scale_factor, name = "Average death rate <br> per 100K people")) + 
   guides(linetype = FALSE) +
   labs(x = "Year",
        color = "Projections",
        title = title_text,
        subtitle = subtitle_text,
        caption = "#Rstudio #ggplot2 | Source: International Smoking Statistics (2016)") +
-  theme_minimal() +
   theme(legend.position = "bottom",
     legend.title = element_markdown(
       color = text_col,
       hjust = 0.5,
       family = "text",
       face = "bold",
-      size = rel(4),
+      size = rel(3),
     ),
     legend.text = element_text(
       color = text_col,
       family = "text",
-      size = rel(3),
+      size = rel(2),
       face = "bold"
     ),
     plot.title            = element_markdown(
@@ -785,9 +791,10 @@ gr5 <- ggplot(lc_cigs_summarised_long, aes(x = Year)) +
       margin              = margin(t = 10, b = 10)
     ),
     axis.title = element_markdown(
-      size = rel(2.5),
+      size = rel(2.2),
       family = "caption",
-      face = "bold"
+      face = "bold",
+      lineheight = 0.2
     ),
     axis.text  = element_markdown(
       size = rel(2),
@@ -849,7 +856,6 @@ gr6 <- ggplot(data = df_overdose_long,aes(x = Year,y = death_rate)) + geom_line(
        title = title_text,
        subtitle = subtitle_text,
        caption = "#Rstudio #ggplot2 | Source: US Centers for Disease Control and Prevention") +
-  theme_void() +
   theme(legend.position = "none",
         strip.text = element_markdown(
           family = "text",
@@ -901,8 +907,9 @@ gr6 <- ggplot(data = df_overdose_long,aes(x = Year,y = death_rate)) + geom_line(
       face = "bold"
     ),
       axis.title.y = element_markdown(
-      size = rel(1.5),
+      size = rel(2),
       family = "text",
+      lineheight = 0.2,
       face = "bold"
     ),
     axis.text  = element_markdown(
@@ -1021,6 +1028,7 @@ gr8 <- ggplot(data = df_survey_stats,aes(x = Total,y = metric,fill = sentiment))
     ),
     axis.title = element_markdown(
       size = rel(3),
+      lineheight = 0.2,
       family = "caption",
       face = "bold"
     ),
