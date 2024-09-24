@@ -1051,3 +1051,8 @@ gr8 <- ggplot(data = df_survey_stats,aes(x = Total,y = metric,fill = sentiment))
 ggsave("images/mental_health_survey.jpeg",gr8,dpi = 300,height = 6, width = 10)
 ```
 
+200-word paragraph
+
+The infographic titled “The Dual Crisis: Mental Health and Substance Abuse in the Modern World” highlights the alarming global trends in drug use, mental health, and substance-related deaths. It emphasises that men are disproportionately affected by drug-related mortality. Deaths from mental health and substance use disorders have significantly increased, especially in the U.S. and Canada, with a sharp spike following the COVID-19 pandemic. Among middle-aged individuals, those aged 15 to 49—especially working professionals in high-stress environments—are most affected by substance use disorders, suggesting work-related stress as a major contributing factor.
+
+Tobacco remains the most lethal substance, causing over 7.2 million deaths annually—three times more than alcohol and significantly higher than illicit drugs. However, there’s a positive trend in declining cigarette consumption, with usage falling since 1974 and projections suggesting continued decline. On the other hand, the data also presents a concerning rise in synthetic drug use, with opioid overdose deaths surging by 58 times since 1990. The data underscores the urgent need for mental health support, particularly in high-stress industries, where professionals are at an elevated risk of substance dependence. Employers’ lack of adequate mental health support is also highlighted as a critical issue.
