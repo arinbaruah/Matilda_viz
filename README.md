@@ -1,5 +1,7 @@
-# Matilda_viz
-This repository contains the reproducible file for creating the Matilda Viz infographic
+# Matilda Viz 2024
+This repository contains the reproducible file for creating the Matilda Viz infographic.
+
+Please support my submission at the 2024 Matilda Visualisation competition by filling [this survey](https://sydney.au1.qualtrics.com/jfe/form/SV_3XeAmNvkdph3HMi) and selecting my entry titled "The Dual Crisis: Mental Health and Substance Abuse in the Modern World"
 
 # Final submission
 ![](https://github.com/arinbaruah/Matilda_viz/blob/main/merged_images/correctly_ordered_merge.png)
